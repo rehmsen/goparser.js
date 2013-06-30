@@ -55,35 +55,34 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
     }
     if (this.isUnicodeDigit(char) || 
         char == '.' && this.isUnicodeDigit(this.peek())) {
-        this.readNumberToken(char);        
+        this.readNumberToken();        
     }
     switch(char) {
     }
 };
 
-gotokenizer.Tokenizer.prototype.readNumberToken = function(char) {
-    console.log("Char is initially " + char)
+gotokenizer.Tokenizer.prototype.readNumberToken = function() {
+    var char = this.cur();
     // hex int
     if(this._input.slice(this._curPos, this._curPos+2) == "0x"){
         this._curPos++;
         char = this.next();
-        decimals = this.readDecimals(char);
+        decimals = this.readDecimals();
         return this.finishToken("int_lit", parseInt(decimals, 16));
     }
     
-    console.log("Input is " + this._input + " index " + this._curPos);
-    var decimals = this.readDecimals(char);
+    var decimals = this.readDecimals();
     
     // float
     switch(this.cur()){
     case '.': 
         char = this.next();
-        this.skipDecimals(char);
+        this.skipDecimals();
         //purposely falling through
     case 'e': 
     case 'E': 
         char = this.cur();
-        this.skipExponent(char);
+        this.skipExponent();
         var tokenString = this._input.slice(this._tok.start, this._cur);
         return this.finishToken("float_lit", parseFloat(tokenString));
     }
@@ -93,7 +92,6 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function(char) {
                decimals.length > 1 && // if only 0 it does not matter
                unicode.isDigit(decimals[1]) ? 8 : 10;
     
-    console.log("Int with base " + base + " and decimals " + decimals);
     return this.finishToken("int_lit", parseInt(decimals, base));
 };
 
@@ -114,22 +112,21 @@ gotokenizer.Tokenizer.prototype.peek = function() {
     return this._input.charAt(this._curPos+1);
 };
 
-gotokenizer.Tokenizer.prototype.skipDecimals = function(char) {
-    console.log("Char is "+ char)
+gotokenizer.Tokenizer.prototype.skipDecimals = function() {
+    var char = this.cur();
     while (unicode.isDigit(char)){
         char = this.next();
     }    
 };
 
-gotokenizer.Tokenizer.prototype.readDecimals = function(char) {
+gotokenizer.Tokenizer.prototype.readDecimals = function() {
     var startPos = this._curPos;
-    this.skipDecimals(char);
-    console.log("Input is " + this._input + " index " + this._curPos);
-
+    this.skipDecimals();
     return this._input.slice(startPos, this._curPos);
 };
 
-gotokenizer.Tokenizer.prototype.skipExponent = function(char) {
+gotokenizer.Tokenizer.prototype.skipExponent = function() {
+    var char = this.cur();
     if (char != 'e' && char != 'E') {
         return;
     }
