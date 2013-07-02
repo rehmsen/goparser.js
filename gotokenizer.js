@@ -111,6 +111,10 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function() {
     char = this.cur();
     this.skipExponent();
     var tokenString = this._input.slice(this._tok.start, this._curPos);
+    if(this.isIdentifierStart(this.cur()))
+    this.raise(
+      "Expected whitespace but found identifier right after int literal.");
+
     return this.finishToken("float_lit", parseFloat(tokenString));
   }
   var base = 10;

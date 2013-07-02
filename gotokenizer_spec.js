@@ -44,6 +44,18 @@ describe("gotokenizer.Tokenizer.readToken Int Parsing", function() {
     }
     expect(f).toThrow();
   });  
+  it("0.1ee should fail", function() {
+    function f() {
+      return (new gotokenizer.Tokenizer("0.1ee")).readToken();
+    }
+    expect(f).toThrow();
+  });  
+  it("0.1f should fail", function() {
+    function f() {
+      return (new gotokenizer.Tokenizer("0.1f")).readToken();
+    }
+    expect(f).toThrow();
+  });  
 });
 
 describe("gotokenizer.Tokenizer.readToken Float Parsing", function() {
