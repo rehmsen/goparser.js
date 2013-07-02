@@ -107,6 +107,23 @@ describe("gotokenizer.Tokenizer.readToken Identifier Parsing", function() {
   });
 });
 
+describe("gotokenizer.Tokenizer.readToken Keyword Parsing", function() {
+  var keywords = [
+      "break", "case", "chan", "const", "continue", "default", "defer", "else",
+      "fallthrough", "for", "func", "go", "goto", "if", "import", "interface", 
+      "map", "package", "range", "return", "select", "struct", "switch", "type",
+      "var"];
+  var keywordsLength = keywords.length;  
+  for(var i=0; i<keywordsLength; i++) {
+      var keyword = keywords[i];
+      it(keyword + " parsed as identifier", function() {
+        expect((new gotokenizer.Tokenizer(keyword)).readToken())
+          .toEqual({start: 0, end: keyword.length, type: "keyword", value: keyword});
+      });
+      
+  }
+});
+
 
 });
 
