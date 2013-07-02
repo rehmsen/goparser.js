@@ -1,4 +1,8 @@
 jsgoparser
 ==========
 
-A parser for the Go programming language written in JavaScript.`
+A parser for the Go programming language written in JavaScript.
+
+This code is still in very early stages and incomplete. Feel free to contact me if you interested. This is a weekend
+project, so it remains to see how far I'll get.
+
