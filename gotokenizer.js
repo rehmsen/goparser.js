@@ -96,12 +96,21 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function() {
         var tokenString = this._input.slice(this._tok.start, this._cur);
         return this.finishToken("float_lit", parseFloat(tokenString));
     }
+    var base = 10;
+    // oct
+    if(decimals[0] == '0' && decimals.length > 1) {
+        this._curPos -= decimals.length-1;
+        var matches = XRegExp.exec(
+            this._input, gotokenizer._OCT_REGEX, this._curPos, true);
+        if(matches === null) {
+            this.raise("Expected oct decimals but found "+this._cur());
+        }
+        decimals = matches[0];
+        this._curPos += decimals.length;
+        base = 8;
+    }
     
     // oct or dec int
-    var base = decimals[0] == '0' && 
-               decimals.length > 1 && // if only 0 it does not matter
-               unicode.isDigit(decimals[1]) ? 8 : 10;
-    
     return this.finishToken("int_lit", parseInt(decimals, base));
 };
 
