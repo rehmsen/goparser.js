@@ -93,7 +93,7 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function() {
     case 'E': 
         char = this.cur();
         this.skipExponent();
-        var tokenString = this._input.slice(this._tok.start, this._cur);
+        var tokenString = this._input.slice(this._tok.start, this._curPos);
         return this.finishToken("float_lit", parseFloat(tokenString));
     }
     var base = 10;

@@ -46,6 +46,48 @@ describe("gotokenizer.Tokenizer.readToken Int Parsing", function() {
   });  
 });
 
+
+describe("gotokenizer.Tokenizer.readToken Float Parsing", function() {
+  it("0. parsed as float", function() {
+    expect((new gotokenizer.Tokenizer("0.")).readToken())
+      .toEqual({start: 0, end: 2, type: "float_lit", value: 0.0});
+  });
+  it("72.40 parsed as float", function() {
+    expect((new gotokenizer.Tokenizer("72.40")).readToken())
+      .toEqual({start: 0, end: 5, type: "float_lit", value: 72.4});
+  });
+  it("072.40 parsed as float", function() {
+    expect((new gotokenizer.Tokenizer("072.40")).readToken())
+      .toEqual({start: 0, end: 6, type: "float_lit", value: 72.4});
+  });
+  it("2.71828 parsed as float", function() {
+    expect((new gotokenizer.Tokenizer("2.71828")).readToken())
+      .toEqual({start: 0, end: 7, type: "float_lit", value: 2.71828});
+  });
+  it("1.e+0 parsed as float", function() {
+    expect((new gotokenizer.Tokenizer("1.e+0")).readToken())
+      .toEqual({start: 0, end: 5, type: "float_lit", value: 1.0});
+  });
+  it("6.67428e-11 parsed as float", function() {
+    expect((new gotokenizer.Tokenizer("6.67428e-11")).readToken())
+      .toEqual({start: 0, end: 11, type: "float_lit", value: 6.67428e-11});
+  });
+  it("1E6 parsed as float", function() {
+    expect((new gotokenizer.Tokenizer("1E6")).readToken())
+      .toEqual({start: 0, end: 3, type: "float_lit", value: 1000000.0});
+  });
+  it(".25 parsed as float", function() {
+    expect((new gotokenizer.Tokenizer(".25")).readToken())
+      .toEqual({start: 0, end: 3, type: "float_lit", value: 0.25});
+  });
+  it("2.71828 parsed as float", function() {
+    expect((new gotokenizer.Tokenizer(
+        ".12345e+5")).readToken())
+      .toEqual({start: 0, end: 9, type: "float_lit", value: 12345.0});
+  });
+
+});
+
 });
 
 
