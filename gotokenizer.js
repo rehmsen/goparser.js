@@ -25,6 +25,7 @@ gotokenizer.TOK_EOF = {type: "eof"};
 gotokenizer._HEX_REGEX = new XRegExp("[0-9a-fA-F]+");
 gotokenizer._OCT_REGEX = new XRegExp("[0-7]+");
 gotokenizer._DEC_REGEX = new XRegExp("[0-9]+");
+gotokenizer._DIGIT_REGEX = new XRegExp("[0-9]");
 
 gotokenizer.Tokenizer = function(input, options) {
     this._input = String(input);
@@ -179,13 +180,11 @@ gotokenizer.Tokenizer.prototype.readWordToken = function() {
 };
 
 gotokenizer.Tokenizer.prototype.readWord = function() {
-    var word = "";
     var char = this._input.charAt(this._curPos);
     while(this.isIdentifierChar(char)) {
-        word += char;
-        char.next();
+        char = this.next();
 }
-    return word;
+    return this._input.slice(this._tok.start, this._curPos);
 };
 
 gotokenizer.Tokenizer.prototype.finishToken = function(type, value) {
@@ -213,7 +212,7 @@ gotokenizer.Tokenizer.prototype.isIdentifierStart = function(char) {
 };
 
 gotokenizer.Tokenizer.prototype.isIdentifierChar = function(char) {
-    return this.isLetter(char) || unicode.isDigit(); 
+    return this.isLetter(char) || gotokenizer._DIGIT_REGEX.test(char); 
 };
 
 gotokenizer.Tokenizer.prototype.isLetter = function(char) {

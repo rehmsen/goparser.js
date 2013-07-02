@@ -46,7 +46,6 @@ describe("gotokenizer.Tokenizer.readToken Int Parsing", function() {
   });  
 });
 
-
 describe("gotokenizer.Tokenizer.readToken Float Parsing", function() {
   it("0. parsed as float", function() {
     expect((new gotokenizer.Tokenizer("0.")).readToken())
@@ -85,8 +84,29 @@ describe("gotokenizer.Tokenizer.readToken Float Parsing", function() {
         ".12345e+5")).readToken())
       .toEqual({start: 0, end: 9, type: "float_lit", value: 12345.0});
   });
-
 });
+
+describe("gotokenizer.Tokenizer.readToken Identifier Parsing", function() {
+  it("a parsed as identifier", function() {
+    expect((new gotokenizer.Tokenizer("a")).readToken())
+      .toEqual({start: 0, end: 1, type: "identifier", value: "a"});
+  });
+  it("_x9 parsed as identifier", function() {
+    expect((new gotokenizer.Tokenizer("_x9")).readToken())
+      .toEqual({start: 0, end: 3, type: "identifier", value: "_x9"});
+  });
+  it("ThisVariableIsExported parsed as identifier", function() {
+    expect((new gotokenizer.Tokenizer("ThisVariableIsExported")).readToken())
+      .toEqual({
+          start: 0, end: 22, type: "identifier", 
+          value: "ThisVariableIsExported"});
+  });
+  it("αβ parsed as float", function() {
+    expect((new gotokenizer.Tokenizer("αβ")).readToken())
+      .toEqual({start: 0, end: 2, type: "identifier", value: "αβ"});
+  });
+});
+
 
 });
 
