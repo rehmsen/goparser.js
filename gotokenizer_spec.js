@@ -26,23 +26,23 @@ describe("gotokenizer.Tokenizer.readToken Int Parsing", function() {
       .toEqual({start: 0, end: 39, type: "int_lit", 
                 value: 170141183460469231731687303715884105727});
   });
-  it("0x25gf should stop parsing at g", function() {
-    var tokenizer = new gotokenizer.Tokenizer("0x25gf");
-    expect(tokenizer.readToken()).toEqual(
-        {start: 0, end: 4, type: "int_lit", value: 37});
-    expect(tokenizer._curPos).toEqual(4);
+  it("0x25gf should fail", function() {
+    function f() {
+      return (new gotokenizer.Tokenizer("0x25gf")).readToken();
+    }
+    expect(f).toThrow();
   });
-  it("02598 should stop parsing at 9", function() {
-    var tokenizer = new gotokenizer.Tokenizer("02598");
-    expect(tokenizer.readToken()).toEqual(
-        {start: 0, end: 3, type: "int_lit", value: 21});
-    expect(tokenizer._curPos).toEqual(3);
+  it("02598 should fail", function() {
+    function f() {
+      return (new gotokenizer.Tokenizer("02598")).readToken();
+    }
+    expect(f).toThrow();
   });
-  it("26fd3 should stop parsing at f", function() {
-    var tokenizer = new gotokenizer.Tokenizer("26fd3");
-    expect(tokenizer.readToken()).toEqual(
-        {start: 0, end: 2, type: "int_lit", value: 26});
-    expect(tokenizer._curPos).toEqual(2);
+  it("26fd3 should fail", function() {
+    function f() {
+      return (new gotokenizer.Tokenizer("26fd3")).readToken();
+    }
+    expect(f).toThrow();
   });  
 });
 

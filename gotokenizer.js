@@ -92,6 +92,9 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function() {
     }
     decimals = matches[0];
     this._curPos += decimals.length;
+    if(this.isIdentifierStart(this.cur()))
+      this.raise(
+        "Expected whitespace but found identifier right after int literal.");
     return this.finishToken("int_lit", parseInt(decimals, 16));
   }
   
@@ -119,11 +122,20 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function() {
     if(matches === null) {
       this.raise("Expected oct decimals but found "+this._cur());
     }
+    this._curPos += matches[0].length;
+    // there were more digits, but they were not octal
+    if(matches[0].length != decimals.length-1)
+      this.raise(
+        "Expected octal digit but found " + this.cur());
+      
     decimals = matches[0];
-    this._curPos += decimals.length;
     base = 8;
   }
-  
+
+  if(this.isIdentifierStart(this.cur()))
+    this.raise(
+      "Expected whitespace but found identifier right after int literal.");
+
   // oct or dec int
   return this.finishToken("int_lit", parseInt(decimals, base));
 };
