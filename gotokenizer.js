@@ -1,6 +1,7 @@
 define(function(require, exports, module) {
 var unicode = require("unicode");
 var util = require("util");
+var XRegExp = require('xregexp');
 
 var gotokenizer = module.exports = {};
 
@@ -21,7 +22,9 @@ gotokenizer.KEYWORDS = [
 
 gotokenizer.TOK_EOF = {type: "eof"};
 
-
+gotokenizer._HEX_REGEX = new XRegExp("[0-9a-fA-F]+");
+gotokenizer._OCT_REGEX = new XRegExp("[0-7]+");
+gotokenizer._DEC_REGEX = new XRegExp("[0-9]+");
 
 gotokenizer.Tokenizer = function(input, options) {
     this._input = String(input);
@@ -39,6 +42,7 @@ gotokenizer.Tokenizer = function(input, options) {
 };
 
 gotokenizer.Tokenizer.prototype.readToken = function() {
+    this._tok.start = this._curPos;
     if (this.trackLocations) {
         this._tok.startLoc = new gotokenizer.Location(
             this._curLine, 
@@ -53,9 +57,9 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
     if (this.isIdentifierStart(char)) {
         return this.readWordToken();
     }
-    if (this.isUnicodeDigit(char) || 
-        char == '.' && this.isUnicodeDigit(this.peek())) {
-        this.readNumberToken();        
+    if (unicode.isDigit(char) || 
+        char == '.' && unicode.isDigit(this.peek())) {
+        return this.readNumberToken();        
     }
     switch(char) {
     }
@@ -67,7 +71,13 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function() {
     if(this._input.slice(this._curPos, this._curPos+2) == "0x"){
         this._curPos++;
         char = this.next();
-        decimals = this.readDecimals();
+        var matches = XRegExp.exec(
+            this._input, gotokenizer._HEX_REGEX, this._curPos, true);
+        if(matches === null) {
+            this.raise("Expected hex decimals but found "+this._cur());
+        }
+        decimals = matches[0];
+        this._curPos += decimals.length;
         return this.finishToken("int_lit", parseInt(decimals, 16));
     }
     
@@ -110,6 +120,18 @@ gotokenizer.Tokenizer.prototype.cur = function() {
 
 gotokenizer.Tokenizer.prototype.peek = function() {
     return this._input.charAt(this._curPos+1);
+};
+
+gotokenizer.Tokenizer.prototype.raise = function(errorMessage) {
+    var errorLocation;
+    if(this._trackLocations) {
+        errorLocation = "Line " + this._curLine  +
+            ", Column: " + (this._curPos - this._lineStart);
+    }
+    else {
+        errorLocation = "Position " + this._cur;
+    }
+    throw new Error(errorLocation + ": " + errorMessage);
 };
 
 gotokenizer.Tokenizer.prototype.skipDecimals = function() {
