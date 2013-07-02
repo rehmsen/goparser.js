@@ -20,6 +20,19 @@ gotokenizer.KEYWORDS = [
     "map", "package", "range", "return", "select", "struct", "switch", "type",
     "var"];
 
+gotokenizer.ARITHMETIC_OPS = ["+", "-", "*", "/", "%"];
+gotokenizer.BITWISE_OPS = ["&", "|", "^", "<<", ">>", "&^"];
+gotokenizer.ASSIGNMENT_OPS = [
+    "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>=", "&^=", "=", 
+    ":="];
+gotokenizer.LOGICAL_OPS = ["&&", "||", "!"];
+gotokenizer.CHANNEL_OPS = ["<-"];
+gotokenizer.INCREMENT_OPS = ["++", "--"];
+gotokenizer.COMPARISON_OPS = ["==", "<", ">", "!=", "<=", ">="];
+gotokenizer.VARIADIC_OPS = ["..."];
+gotokenizer.BRACKETS = ["(", ")", "[", "]", "{", "}"];
+gotokenizer.DELIMITERS = [",", ";", ".", ":"];
+
 gotokenizer.TOK_EOF = {type: "eof"};
 
 gotokenizer._HEX_REGEX = new XRegExp("[0-9a-fA-F]+");
