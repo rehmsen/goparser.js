@@ -81,6 +81,8 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
 
 gotokenizer.Tokenizer.prototype.readNumberToken = function() {
   var char = this.cur();
+  var imaginary = false;
+
   // hex int
   if(this._input.slice(this._curPos, this._curPos+2) == "0x"){
     this._curPos++;
@@ -111,15 +113,25 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function() {
     char = this.cur();
     this.skipExponent();
     var tokenString = this._input.slice(this._tok.start, this._curPos);
-    if(this.isIdentifierStart(this.cur()))
-    this.raise(
-      "Expected whitespace but found identifier right after int literal.");
-
-    return this.finishToken("float_lit", parseFloat(tokenString));
+    if(this.cur()=="i") {
+      imaginary = true;
+      this.next();
+    }
+    else if(this.isIdentifierStart(this.cur())) { 
+      this.raise(
+        "Expected whitespace but found identifier right after int literal.");
+    }
+    return this.finishToken(
+      imaginary ? "imaginary_lit" : "float_lit", parseFloat(tokenString));
   }
   var base = 10;
+  
+  if(this.cur()=="i") {
+    imaginary = true;
+    this.next();
+  }
   // oct
-  if(decimals[0] == '0' && decimals.length > 1) {
+  else if(decimals[0] == '0' && decimals.length > 1) {
     this._curPos -= decimals.length-1;
     var matches = XRegExp.exec(
       this._input, gotokenizer._OCT_REGEX, this._curPos, true);
@@ -127,6 +139,8 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function() {
       this.raise("Expected oct decimals but found "+this._cur());
     }
     this._curPos += matches[0].length;
+    
+    
     // there were more digits, but they were not octal
     if(matches[0].length != decimals.length-1)
       this.raise(
@@ -141,7 +155,8 @@ gotokenizer.Tokenizer.prototype.readNumberToken = function() {
       "Expected whitespace but found identifier right after int literal.");
 
   // oct or dec int
-  return this.finishToken("int_lit", parseInt(decimals, base));
+  return this.finishToken(
+    imaginary ? "imaginary_lit" : "int_lit", parseInt(decimals, base));
 };
 
 gotokenizer.Tokenizer.prototype.skip = function() {

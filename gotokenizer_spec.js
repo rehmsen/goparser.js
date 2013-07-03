@@ -58,6 +58,45 @@ describe("gotokenizer.Tokenizer.readToken Int Parsing", function() {
   });  
 });
 
+describe("gotokenizer.Tokenizer.readToken Imaginary Parsing", function() {
+  it("0i parsed as imaginary", function() {
+    expect((new gotokenizer.Tokenizer("0i")).readToken())
+      .toEqual({start: 0, end: 2, type: "imaginary_lit", value: 0});
+  });
+  it("011i parsed as imaginary", function() {
+    expect((new gotokenizer.Tokenizer("011i")).readToken())
+      .toEqual({start: 0, end: 4, type: "imaginary_lit", value: 11});
+  });
+  it("0.i parsed as imaginary", function() {
+    expect((new gotokenizer.Tokenizer("0.i")).readToken())
+      .toEqual({start: 0, end: 3, type: "imaginary_lit", value: 0.0});
+  });
+  it("2.71828i parsed as imaginary", function() {
+    expect((new gotokenizer.Tokenizer("2.71828i")).readToken())
+      .toEqual({start: 0, end: 8, type: "imaginary_lit", value: 2.71828});
+  });
+  it("1.e+0i parsed as imaginary", function() {
+    expect((new gotokenizer.Tokenizer("1.e+0i")).readToken())
+      .toEqual({start: 0, end: 6, type: "imaginary_lit", value: 1.0});
+  });
+  it("6.67428e-11i parsed as imaginary", function() {
+    expect((new gotokenizer.Tokenizer("6.67428e-11i")).readToken())
+      .toEqual({start: 0, end: 12, type: "imaginary_lit", value: 6.67428e-11});
+  });
+  it("1E6i parsed as imaginary", function() {
+    expect((new gotokenizer.Tokenizer("1E6i")).readToken())
+      .toEqual({start: 0, end: 4, type: "imaginary_lit", value: 1000000});
+  });
+  it(".25i parsed as imaginary", function() {
+    expect((new gotokenizer.Tokenizer(".25i")).readToken())
+      .toEqual({start: 0, end: 4, type: "imaginary_lit", value: 0.25});
+  });
+  it(".12345E+5i parsed as imaginary", function() {
+    expect((new gotokenizer.Tokenizer(".12345E+5i")).readToken())
+      .toEqual({start: 0, end: 10, type: "imaginary_lit", value: 12345.0});
+  });
+});
+
 describe("gotokenizer.Tokenizer.readToken Float Parsing", function() {
   it("0. parsed as float", function() {
     expect((new gotokenizer.Tokenizer("0.")).readToken())
@@ -113,7 +152,7 @@ describe("gotokenizer.Tokenizer.readToken Identifier Parsing", function() {
           start: 0, end: 22, type: "identifier", 
           value: "ThisVariableIsExported"});
   });
-  it("αβ parsed as float", function() {
+  it("αβ parsed as identifier", function() {
     expect((new gotokenizer.Tokenizer("αβ")).readToken())
       .toEqual({start: 0, end: 2, type: "identifier", value: "αβ"});
   });
