@@ -71,8 +71,8 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
   if (this.isIdentifierStart(char)) {
     return this.readWordToken();
   }
-  if (unicode.isDigit(char) || 
-    char == '.' && unicode.isDigit(this.peek())) {
+  if (gotokenizer._DIGIT_REGEX.test(char) || 
+    char == '.' && gotokenizer._DIGIT_REGEX.test(this.peek())) {
     return this.readNumberToken();        
   }
   switch(char) {
@@ -190,7 +190,7 @@ gotokenizer.Tokenizer.prototype.raise = function(errorMessage) {
 
 gotokenizer.Tokenizer.prototype.skipDecimals = function() {
   var char = this.cur();
-  while (unicode.isDigit(char)){
+  while (gotokenizer._DIGIT_REGEX.test(char)){
     char = this.next();
   }    
 };
