@@ -244,9 +244,30 @@ gotokenizer.Tokenizer.prototype.finishToken = function(type, value) {
   return this._tok;
 };
 
-
 gotokenizer.Tokenizer.prototype.skipSpace = function() {
-  // TODO: Implement
+  var char = this.cur();
+  var changed = true;
+  while(changed) {
+    var newline = false;
+    changed = false;
+    if (char == "\r") {
+      char = this.next();
+      newline = true;
+    }
+    if (char == "\n") {
+      char = this.next();
+      newline = true;
+    }
+    if (newline) {
+      this._curLine++;
+      this._lineStart=this._curPos;
+      changed=true;
+    }
+    if (char == " " || char == "\t") {
+      char = this.next();
+      changed=true;
+    }
+  }
 };
 
 gotokenizer.Tokenizer.prototype.isKeyword = util.makePredicate(gotokenizer.KEYWORDS);

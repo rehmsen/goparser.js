@@ -167,13 +167,66 @@ describe("gotokenizer.Tokenizer.readToken Keyword Parsing", function() {
   var keywordsLength = keywords.length;  
   for(var i=0; i<keywordsLength; i++) {
       var keyword = keywords[i];
-      it(keyword + " parsed as identifier", function() {
+      it(keyword + " parsed as keyword", function() {
         expect((new gotokenizer.Tokenizer(keyword)).readToken())
           .toEqual({start: 0, end: keyword.length, type: "keyword", value: keyword});
-      });
-      
+      }); 
   }
 });
+
+describe("gotokenizer.Tokenizer.skipSpace", function() {
+  it("skips multiple spaces", function() {
+    var tokenizer = new gotokenizer.Tokenizer("   a");
+    tokenizer.skipSpace();
+    expect(tokenizer._curPos).toEqual(3);
+  });
+  it("skips multiple tabs", function() {
+    var tokenizer = new gotokenizer.Tokenizer("\t\ta");
+    tokenizer.skipSpace();
+    expect(tokenizer._curPos).toEqual(2);
+  });
+  it("skips mixed tabs and spaces", function() {
+    var tokenizer = new gotokenizer.Tokenizer("\t \t  a");
+    tokenizer.skipSpace();
+    expect(tokenizer._curPos).toEqual(5);
+  });
+  it("skips newline", function() {
+    var tokenizer = new gotokenizer.Tokenizer("\na");
+    tokenizer.skipSpace();
+    expect(tokenizer._curPos).toEqual(1);
+    expect(tokenizer._curLine).toEqual(2);
+    expect(tokenizer._lineStart).toEqual(1);
+  });
+  it("skips multiple newline", function() {
+    var tokenizer = new gotokenizer.Tokenizer("\n\n a");
+    tokenizer.skipSpace();
+    expect(tokenizer._curPos).toEqual(3);
+    expect(tokenizer._curLine).toEqual(3);
+    expect(tokenizer._lineStart).toEqual(2);
+  });
+  it("skips carriage return", function() {
+    var tokenizer = new gotokenizer.Tokenizer("\ra");
+    tokenizer.skipSpace();
+    expect(tokenizer._curPos).toEqual(1);
+    expect(tokenizer._curLine).toEqual(2);
+    expect(tokenizer._lineStart).toEqual(1);
+  });
+  it("cr lf treated as one new line", function() {
+    var tokenizer = new gotokenizer.Tokenizer("\r\na");
+    tokenizer.skipSpace();
+    expect(tokenizer._curPos).toEqual(2);
+    expect(tokenizer._curLine).toEqual(2);
+    expect(tokenizer._lineStart).toEqual(2);
+  });
+  it("lf cr treated as two new lines", function() {
+    var tokenizer = new gotokenizer.Tokenizer("\n\ra");
+    tokenizer.skipSpace();
+    expect(tokenizer._curPos).toEqual(2);
+    expect(tokenizer._curLine).toEqual(3);
+    expect(tokenizer._lineStart).toEqual(2);
+  });
+});
+
 
 
 });
