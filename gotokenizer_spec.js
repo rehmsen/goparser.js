@@ -227,6 +227,38 @@ describe("gotokenizer.Tokenizer.skipSpace", function() {
   });
 });
 
+describe("gotokenizer.Tokenizer.readToken skip comments", function() {
+  it("skips line comment at start", function() {
+    var tokenizer = new gotokenizer.Tokenizer("// comment \n");
+    expect(tokenizer.readToken()).toEqual(
+      {start:12, end:12, type: gotokenizer.TOK_EOF});
+    expect(tokenizer._curPos).toEqual(12);
+    expect(tokenizer._curLine).toEqual(2);
+    expect(tokenizer._lineStart).toEqual(12);
+  });
+  it("skips line comment", function() {
+    var tokenizer = new gotokenizer.Tokenizer("a\n// comment \n");
+    tokenizer.readToken();
+    expect(tokenizer._curPos).toEqual(14);
+    expect(tokenizer._curLine).toEqual(3);
+    expect(tokenizer._lineStart).toEqual(14);
+  });
+  it("skips line comment at the end of line", function() {
+    var tokenizer = new gotokenizer.Tokenizer("a// comment \n");
+    tokenizer.readToken();
+    expect(tokenizer._curPos).toEqual(13);
+    expect(tokenizer._curLine).toEqual(2);
+    expect(tokenizer._lineStart).toEqual(13);
+  });
+  it("skips line comment at end of file", function() {
+    var tokenizer = new gotokenizer.Tokenizer("// comment ");
+    expect(tokenizer.readToken()).toEqual(
+      {start:11, end:11, type: gotokenizer.TOK_EOF});
+    expect(tokenizer._curPos).toEqual(11);
+    expect(tokenizer._curLine).toEqual(1);
+    expect(tokenizer._lineStart).toEqual(0);
+  });
+});
 
 
 });

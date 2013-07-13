@@ -49,10 +49,10 @@ gotokenizer.Tokenizer = function(input, options) {
 
   this._tok = {};
 
-  this._cur = "";
   this._curPos = 0;
   this._curLine = 1;
   this._lineStart = 0;  
+  this.skipSpace();
 };
 
 gotokenizer.Tokenizer.prototype.readToken = function() {
@@ -62,7 +62,8 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
       this._curLine, 
       this._curPos - this._lineStart);
   }
-  if (this._curPos > this._inputLength) {
+  this.logPosition();
+  if (this._curPos >= this._inputLength) {
     return this.finishToken(gotokenizer.TOK_EOF);
   }
   
@@ -75,6 +76,7 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
     char == '.' && gotokenizer._DIGIT_REGEX.test(this.peek())) {
     return this.readNumberToken();        
   }
+  
   switch(char) {
   }
 };
@@ -176,6 +178,14 @@ gotokenizer.Tokenizer.prototype.peek = function() {
   return this._input.charAt(this._curPos+1);
 };
 
+gotokenizer.Tokenizer.prototype.startsWithAndSkip = function(s) {
+  var startsWith = this._input.slice(this._curPos, this._curPos+s.length) == s;
+  if (startsWith) {
+    this._curPos += s.length;
+  }
+  return startsWith;
+};
+
 gotokenizer.Tokenizer.prototype.raise = function(errorMessage) {
   var errorLocation;
   if(this._trackLocations) {
@@ -247,26 +257,57 @@ gotokenizer.Tokenizer.prototype.finishToken = function(type, value) {
 gotokenizer.Tokenizer.prototype.skipSpace = function() {
   var char = this.cur();
   var changed = true;
-  while(changed) {
-    var newline = false;
-    changed = false;
-    if (char == "\r") {
-      char = this.next();
-      newline = true;
-    }
-    if (char == "\n") {
-      char = this.next();
-      newline = true;
-    }
-    if (newline) {
-      this._curLine++;
-      this._lineStart=this._curPos;
-      changed=true;
-    }
+  while(this._curPos < this._inputLength && changed) {
+    changed = this.isNewlineAndSkip(char);
+    char = this.cur();
     if (char == " " || char == "\t") {
       char = this.next();
-      changed=true;
+      changed = true;
     }
+    if (this.startsWithAndSkip("//")) {
+      this.skipLineComment();
+      changed = true;
+    }
+    if (this.startsWithAndSkip("/*")) {
+      this.skipBlockComment();
+      changed = true;
+    }
+  }
+};
+
+gotokenizer.Tokenizer.prototype.logPosition = function() {
+  console.log("Position: " + this._curPos + ", Char: " + this.cur());
+};
+
+gotokenizer.Tokenizer.prototype.isNewlineAndSkip = function(char) {
+  var newline = false;
+  if (char == "\r") {
+    char = this.next();
+    newline = true;
+  }
+
+  if (char == "\n") {
+    this._curPos++;
+    newline = true;
+  }
+  if (newline) {
+    this._curLine++;
+    this._lineStart=this._curPos;
+  }
+  return newline;
+};
+ 
+gotokenizer.Tokenizer.prototype.skipLineComment = function() {
+
+  var char = this.cur();
+  while (this._curPos < this._inputLength && !this.isNewlineAndSkip(char)) {
+    char = this.next();
+  }
+};
+
+gotokenizer.Tokenizer.prototype.skipBlockComment = function() {
+  while (this.startsWithAndSkip("*/")) {
+    if(!this.isNewLineAndSkip(this.cur())) this.next();
   }
 };
 
