@@ -62,7 +62,6 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
       this._curLine, 
       this._curPos - this._lineStart);
   }
-  this.logPosition();
   if (this._curPos >= this._inputLength) {
     return this.finishToken(gotokenizer.TOK_EOF);
   }
@@ -306,8 +305,8 @@ gotokenizer.Tokenizer.prototype.skipLineComment = function() {
 };
 
 gotokenizer.Tokenizer.prototype.skipBlockComment = function() {
-  while (this.startsWithAndSkip("*/")) {
-    if(!this.isNewLineAndSkip(this.cur())) this.next();
+  while (!this.startsWithAndSkip("*/")) {
+    if(!this.isNewlineAndSkip(this.cur())) this.next();
   }
 };
 

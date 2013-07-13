@@ -258,6 +258,14 @@ describe("gotokenizer.Tokenizer.readToken skip comments", function() {
     expect(tokenizer._curLine).toEqual(1);
     expect(tokenizer._lineStart).toEqual(0);
   });
+  it("skips block comment", function() {
+    var tokenizer = new gotokenizer.Tokenizer("/* hello/* \nworld */");
+    expect(tokenizer.readToken()).toEqual(
+      {start:20, end:20, type: gotokenizer.TOK_EOF});
+    expect(tokenizer._curPos).toEqual(20);
+    expect(tokenizer._curLine).toEqual(2);
+    expect(tokenizer._lineStart).toEqual(12);
+  });
 });
 
 
