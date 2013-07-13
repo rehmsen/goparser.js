@@ -268,7 +268,12 @@ describe("gotokenizer.Tokenizer.readToken skip comments", function() {
   });
 });
 
-
+describe("gotokenizer.Tokenizer.readToken rune literals", function() {
+  it("plain rune literals", function() {
+    var tokenizer = new gotokenizer.Tokenizer("'a'");
+    expect(tokenizer.readToken()).toEqual(
+      {start: 0, end: 3, type: "rune_lit", value: "a"});
+    expect(tokenizer._curPos).toEqual(3);
+  });
 });
-
-
+});

@@ -77,6 +77,8 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
   }
   
   switch(char) {
+    case "'":
+      return this.readRuneToken();
   }
 };
 
@@ -307,6 +309,20 @@ gotokenizer.Tokenizer.prototype.skipLineComment = function() {
 gotokenizer.Tokenizer.prototype.skipBlockComment = function() {
   while (!this.startsWithAndSkip("*/")) {
     if(!this.isNewlineAndSkip(this.cur())) this.next();
+  }
+};
+
+gotokenizer.Tokenizer.prototype.readRuneToken = function() {
+  var char = this.next();
+  if (char != '\\') {
+    var end = this.next();
+    if (end != "'") {
+      this.raise(
+        "Expected single character in run not beginning with \\ but " +
+        "found " + end);
+    }
+    this._curPos++;
+    return this.finishToken("rune_lit", char); 
   }
 };
 
