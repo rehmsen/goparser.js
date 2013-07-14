@@ -83,6 +83,8 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
       return this.readRuneToken();
     case "`":
       return this.readRawStringToken();
+    case '"':
+      return this.readInterpretedStringToken();
   }
 };
 
@@ -326,22 +328,46 @@ gotokenizer.Tokenizer.prototype.readRawStringToken = function() {
   var lastIndex = this._curPos;
   var value = "";
   while (!this.startsWithAndSkip('`')) {
+    if (char == this._EOT) {
+      this.raise("Unexpected end of input.");
+    }
     if (char == '\r') {
       value += this._input.slice(lastIndex, this._curPos);
       lastIndex = this._curPos + 1;
     }
     if (!this.isNewlineAndSkip(char)) this.next();
     char = this.cur();
-    if (char == this._EOT) {
-      this.raise("Unexpected end of input.");
-    }
   }
   value += this._input.slice(lastIndex, this._curPos-1);
-  return  this.finishToken("string_lit", value);
+  return this.finishToken("string_lit", value);
+};
+
+gotokenizer.Tokenizer.prototype.readInterpretedStringToken = function() {
+  var value = "";
+  this._curPos++;
+  while (!this.startsWithAndSkip('"')) {
+    if (this.cur() == this._EOT) {
+      this.raise("Unexpected end of input.");
+    }
+    value += this._parseRune(true);
+  }
+  return this.finishToken("string_lit", value);
 };
 
 gotokenizer.Tokenizer.prototype.readRuneToken = function() {
-  var char = this.next();
+  this._curPos++;
+  var char = this._parseRune(false);
+  var end = this.cur();
+  if (end != "'") {
+    this.raise(
+      "Expected ' after rune but found " + end);
+  }
+  this._curPos++;
+  return this.finishToken("rune_lit", char); 
+};
+
+gotokenizer.Tokenizer.prototype._parseRune = function(inString) {
+  var char = this.cur();
   if (char == '\\') {
     char = this.next();
     switch(char) {
@@ -353,8 +379,12 @@ gotokenizer.Tokenizer.prototype.readRuneToken = function() {
       case 't': char = '\t'; break; 
       case 'v': char = '\v'; break; 
       case '\\': char = '\\'; break; 
-      case '\'': char = '\''; break; 
-      case '"': char = '"'; break;
+      case '\'': 
+        if (inString) this.raise("Escaping single quotes disallowed in string.");
+        char = '\''; break; 
+      case '"': 
+        if (!inString) this.raise("Escaping double quotes disallowed in rune.");
+        char = '"'; break;
       case 'x': 
       case 'u':
       case 'U':
@@ -380,13 +410,8 @@ gotokenizer.Tokenizer.prototype.readRuneToken = function() {
         char = this._parseDigits(gotokenizer._OCT_REGEX, 3, 8, 255);  
     }
   }
-  var end = this.next();
-  if (end != "'") {
-    this.raise(
-      "Expected ' after rune but found " + end);
-  }
   this._curPos++;
-  return this.finishToken("rune_lit", char); 
+  return char;
 };
 
 gotokenizer.Tokenizer.prototype._parseDigits = 

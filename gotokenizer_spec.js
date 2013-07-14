@@ -331,6 +331,12 @@ describe("gotokenizer.Tokenizer.readToken rune literals", function() {
       (new gotokenizer.Tokenizer("'\\0'")).readToken()
     }).toThrow();
   });
+  it("disallow escaped double quotes in interpreted string", function() {
+    expect(function () {
+      (new gotokenizer.Tokenizer("'\\\"'")).readToken()
+    }).toThrow();
+  });
+
 });
 
 describe("gotokenizer.Tokenizer.readToken raw string literals", function() {
@@ -355,5 +361,45 @@ describe("gotokenizer.Tokenizer.readToken raw string literals", function() {
     }).toThrow();
   });
 });
+
+"\uD800"       // illegal: surrogate half
+"\U00110000"   // illegal: invalid Unicode code point
+
+describe("gotokenizer.Tokenizer.readToken interpreted string literals", function() {
+  it("hello world", function() {
+    expect((new gotokenizer.Tokenizer('"hello world"')).readToken()).toEqual(
+      {start: 0, end: 13, type: "string_lit", value: "hello world"});
+  });
+  it("\\tinterpreted\\n", function() {
+    expect((new gotokenizer.Tokenizer('"\\tinterpreted\\n"')).readToken()).toEqual(
+      {start: 0, end: 17, type: "string_lit", value: "\tinterpreted\n"});
+  });
+  it("日本語", function() {
+    expect((new gotokenizer.Tokenizer('"日本語"')).readToken()).toEqual(
+      {start: 0, end: 5, type: "string_lit", value: "日本語"});
+  });
+  it("\\u65e5本\\U00008a9e", function() {
+    expect((new gotokenizer.Tokenizer('"\\u65e5本\\U00008a9e"')).readToken()).toEqual(
+      {start: 0, end: 19, type: "string_lit", value: "日本語"});
+  });
+  it("\\xff\\u00FF", function() {
+    expect((new gotokenizer.Tokenizer('"\\xff\\u00FF"')).readToken()).toEqual(
+      {start: 0, end: 12, type: "string_lit", value: "ÿÿ"});
+  });
+  it("disallow double quotes in interpreted string", function() {
+    var tokenizer = new gotokenizer.Tokenizer('"""');
+    expect(tokenizer.readToken()).toEqual(
+      {start: 0, end: 2, type: "string_lit", value: ""});
+    expect(function () {
+      tokenizer.readToken()
+    }).toThrow();
+  });
+  it("disallow escaped single quotes in interpreted string", function() {
+    expect(function () {
+      (new gotokenizer.Tokenizer('"\\\'"')).readToken()
+    }).toThrow();
+  });
+});
+
 });
 
