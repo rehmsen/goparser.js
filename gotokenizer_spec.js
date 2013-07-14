@@ -266,6 +266,11 @@ describe("gotokenizer.Tokenizer.readToken skip comments", function() {
     expect(tokenizer._curLine).toEqual(2);
     expect(tokenizer._lineStart).toEqual(12);
   });
+  it("disallows non matching block comment", function() {
+    expect(function() { 
+      (new gotokenizer.Tokenizer("/* hello")).readToken(); 
+    }).toThrow();
+  });
 });
 
 
@@ -283,10 +288,10 @@ describe("gotokenizer.Tokenizer.readToken rune literals", function() {
       {start: 0, end: 3, type: "rune_lit", value: "本"});
   });
   it("disallow multiple plain rune literals", function() {
-    function f() {
+    
+    expect(function() {
       (new gotokenizer.Tokenizer("'aa'")).readToken();
-    }
-    expect(f).toThrow();
+    }).toThrow();
   });
   it("special rune literals", function() {
     expect((new gotokenizer.Tokenizer("'\\t'")).readToken()).toEqual(
@@ -297,10 +302,9 @@ describe("gotokenizer.Tokenizer.readToken rune literals", function() {
       {start: 0, end: 6, type: "rune_lit", value: "O"});
   });
   it("disallow too few hex decimals", function() {
-    function f() {
+    expect(function() {
       (new gotokenizer.Tokenizer("'\\xa'")).readToken();
-    }
-    expect(f).toThrow();
+    }).toThrow();
   });
   it("little u byte value", function() {
     expect((new gotokenizer.Tokenizer("'\\u12e4'")).readToken()).toEqual(
@@ -314,25 +318,42 @@ describe("gotokenizer.Tokenizer.readToken rune literals", function() {
   //     {start: 0, end: 12, type: "rune_lit", value: String.fromCodePoint(0x2F804)});
   // });
   it("disallow surrogate half", function() {
-    function f() {
+    expect(function() {
       (new gotokenizer.Tokenizer("'\\uDFFF'")).readToken();
-    }
-    expect(f).toThrow();
+    }).toThrow();
   });
   it("octal byte value", function() {
     expect((new gotokenizer.Tokenizer("'\\115'")).readToken()).toEqual(
       {start: 0, end: 6, type: "rune_lit", value: "M"});
   });
-  it("octal byte value", function() {
+  it("disallow octal with not exactly 3 digits", function() {
     expect(function () {
       (new gotokenizer.Tokenizer("'\\0'")).readToken()
     }).toThrow();
   });
+});
 
+describe("gotokenizer.Tokenizer.readToken raw string literals", function() {
+  it("plain raw string literal", function() {
+    expect((new gotokenizer.Tokenizer("`hello world`")).readToken()).toEqual(
+      {start: 0, end: 13, type: "string_lit", value: "hello world"});
+  });
+  it("raw string literal with newline - carriage return discarded", function() {
+    expect((new gotokenizer.Tokenizer("`hello \n\rworld`")).readToken()).toEqual(
+      {start: 0, end: 15, type: "string_lit", value: "hello \nworld"});
+  });
+  it("raw string literal not interpreted", function() {
+    expect((new gotokenizer.Tokenizer("`\\traw\\734`")).readToken()).toEqual(
+      {start: 0, end: 11, type: "string_lit", value: "\\traw\\734"});
+  });
+  it("disallow backtick in raw string", function() {
+    var tokenizer = new gotokenizer.Tokenizer("```");
+    expect(tokenizer.readToken()).toEqual(
+      {start: 0, end: 2, type: "string_lit", value: ""});
+    expect(function () {
+      tokenizer.readToken()
+    }).toThrow();
+  });
 });
 });
 
-// '\000'
-// '\007'
-// '\377'
-// '\0'         // illegal: too few octal digits

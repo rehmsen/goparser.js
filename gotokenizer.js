@@ -40,6 +40,8 @@ gotokenizer._OCT_REGEX = new XRegExp("[0-7]+");
 gotokenizer._DEC_REGEX = new XRegExp("[0-9]+");
 gotokenizer._DIGIT_REGEX = new XRegExp("[0-9]");
 
+gotokenizer._EOT = String.fromCharCode(0x04);
+
 gotokenizer.Tokenizer = function(input, options) {
   this._input = String(input);
   this._inputLength = this._input.length;
@@ -66,7 +68,7 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
     return this.finishToken(gotokenizer.TOK_EOF);
   }
   
-  var char = this._input.charAt(this._curPos);
+  var char = this.cur();
   
   if (this.isIdentifierStart(char)) {
     return this.readWordToken();
@@ -79,6 +81,8 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
   switch(char) {
     case "'":
       return this.readRuneToken();
+    case "`":
+      return this.readRawStringToken();
   }
 };
 
@@ -172,6 +176,9 @@ gotokenizer.Tokenizer.prototype.next = function() {
 };
 
 gotokenizer.Tokenizer.prototype.cur = function() {
+  if (this._curPos >= this._inputLength) {
+    return this._EOT;
+  }
   return this._input.charAt(this._curPos);
 };
 
@@ -299,7 +306,6 @@ gotokenizer.Tokenizer.prototype.isNewlineAndSkip = function(char) {
 };
  
 gotokenizer.Tokenizer.prototype.skipLineComment = function() {
-
   var char = this.cur();
   while (this._curPos < this._inputLength && !this.isNewlineAndSkip(char)) {
     char = this.next();
@@ -308,8 +314,30 @@ gotokenizer.Tokenizer.prototype.skipLineComment = function() {
 
 gotokenizer.Tokenizer.prototype.skipBlockComment = function() {
   while (!this.startsWithAndSkip("*/")) {
-    if(!this.isNewlineAndSkip(this.cur())) this.next();
+    if (!this.isNewlineAndSkip(this.cur())) this.next();
+    if (this.cur() == this._EOT) {
+      this.raise("Unexpected end of input.");
+    }
   }
+};
+
+gotokenizer.Tokenizer.prototype.readRawStringToken = function() {
+  var char = this.next();
+  var lastIndex = this._curPos;
+  var value = "";
+  while (!this.startsWithAndSkip('`')) {
+    if (char == '\r') {
+      value += this._input.slice(lastIndex, this._curPos);
+      lastIndex = this._curPos + 1;
+    }
+    if (!this.isNewlineAndSkip(char)) this.next();
+    char = this.cur();
+    if (char == this._EOT) {
+      this.raise("Unexpected end of input.");
+    }
+  }
+  value += this._input.slice(lastIndex, this._curPos-1);
+  return  this.finishToken("string_lit", value);
 };
 
 gotokenizer.Tokenizer.prototype.readRuneToken = function() {
@@ -349,9 +377,7 @@ gotokenizer.Tokenizer.prototype.readRuneToken = function() {
         break;
       default: 
         // octal
-        char = this._parseDigits(gotokenizer._OCT_REGEX, 3, 8, 255);
-        
-        
+        char = this._parseDigits(gotokenizer._OCT_REGEX, 3, 8, 255);  
     }
   }
   var end = this.next();
