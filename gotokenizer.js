@@ -328,17 +328,33 @@ gotokenizer.Tokenizer.prototype.readRuneToken = function() {
       case '\'': char = '\''; break; 
       case '"': char = '"'; break;
       case 'x': 
+      case 'u':
+      case 'U':
         var matches = XRegExp.exec(
           this._input, gotokenizer._HEX_REGEX, this._curPos+1, true);
         if(matches === null) {
           this.raise("Expected hex decimals but found "+this.peek());
         }
-        if(matches[0].length != 2) {
-          this.raise(
-            "Expected exactly two hex decimals but found "+ matches[0]);
+        var numExpectedHexDigits;
+        switch(char) {
+          case 'x': numExpectedHexDigits = 2; break;
+          case 'u': numExpectedHexDigits = 4; break;
+          case 'U': numExpectedHexDigits = 8; break;
         }
-        char = String.fromCharCode(parseInt(matches[0], 16));
-        this._curPos += 2;
+        if(matches[0].length != numExpectedHexDigits) {
+          this.raise(
+            "Expected exactly " + numExpectedHexDigits + " hex decimals but " +
+            "found "+ matches[0]);
+        }
+        var codePoint = parseInt(matches[0], 16);
+        if (codePoint > 0x10FFFF) {
+          this.raise("Unicode value cannot be above 0x10FFFF!");
+        }
+        if (numExpectedHexDigits<8 && unicode.isSurrogateCode(codePoint)) {
+          this.raise("Half surrogates not allowed in runes.");
+        }
+        char = String.fromCodePoint(codePoint);
+        this._curPos += numExpectedHexDigits;
         break;
       default: this.raise("Not implemented yet");
     }

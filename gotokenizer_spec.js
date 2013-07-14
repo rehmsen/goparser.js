@@ -268,15 +268,6 @@ describe("gotokenizer.Tokenizer.readToken skip comments", function() {
   });
 });
 
-// '\000'
-// '\007'
-// '\377'
-// '\u12e4'
-// '\U00101234'
-// '\xa'        // illegal: too few hexadecimal digits
-// '\0'         // illegal: too few octal digits
-// '\uDFFF'     // illegal: surrogate half
-// '\U00110000' // illegal: invalid Unicode code point
 
 describe("gotokenizer.Tokenizer.readToken rune literals", function() {
   it("plain rune literals", function() {
@@ -292,8 +283,10 @@ describe("gotokenizer.Tokenizer.readToken rune literals", function() {
       {start: 0, end: 3, type: "rune_lit", value: "本"});
   });
   it("disallow multiple plain rune literals", function() {
-    var tokenizer = new gotokenizer.Tokenizer("'aa'");
-    expect(tokenizer.readToken).toThrow();
+    function f() {
+      (new gotokenizer.Tokenizer("'aa'")).readToken();
+    }
+    expect(f).toThrow();
   });
   it("special rune literals", function() {
     expect((new gotokenizer.Tokenizer("'\\t'")).readToken()).toEqual(
@@ -304,8 +297,33 @@ describe("gotokenizer.Tokenizer.readToken rune literals", function() {
       {start: 0, end: 6, type: "rune_lit", value: "O"});
   });
   it("disallow too few hex decimals", function() {
-    var tokenizer = new gotokenizer.Tokenizer("'\\xa'");
-    expect(tokenizer.readToken).toThrow();
+    function f() {
+      (new gotokenizer.Tokenizer("'\\xa'")).readToken();
+    }
+    expect(f).toThrow();
+  });
+  it("little u byte value", function() {
+    expect((new gotokenizer.Tokenizer("'\\u12e4'")).readToken()).toEqual(
+      {start: 0, end: 8, type: "rune_lit", value: "ዤ"});
+  });
+
+  // TODO: How to support/test unicode-32?
+  // '\U00101234' //legal
+  // '\U00110000' // illegal: invalid Unicode code point
+  // it("large U byte value", function() {
+  //   expect((new gotokenizer.Tokenizer("'\\U0002F804'")).readToken()).toEqual(
+  //     {start: 0, end: 12, type: "rune_lit", value: String.fromCodePoint(0x2F804)});
+  // });
+  it("disallow surrogate half", function() {
+    function f() {
+      (new gotokenizer.Tokenizer("'\\uDFFF'")).readToken()
+    }
+    expect(f).toThrow();
   });
 });
 });
+
+// '\000'
+// '\007'
+// '\377'
+// '\0'         // illegal: too few octal digits
