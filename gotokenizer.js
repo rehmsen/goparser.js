@@ -330,33 +330,28 @@ gotokenizer.Tokenizer.prototype.readRuneToken = function() {
       case 'x': 
       case 'u':
       case 'U':
-        var matches = XRegExp.exec(
-          this._input, gotokenizer._HEX_REGEX, this._curPos+1, true);
-        if(matches === null) {
-          this.raise("Expected hex decimals but found "+this.peek());
-        }
         var numExpectedHexDigits;
         switch(char) {
           case 'x': numExpectedHexDigits = 2; break;
           case 'u': numExpectedHexDigits = 4; break;
           case 'U': numExpectedHexDigits = 8; break;
         }
-        if(matches[0].length != numExpectedHexDigits) {
-          this.raise(
-            "Expected exactly " + numExpectedHexDigits + " hex decimals but " +
-            "found "+ matches[0]);
-        }
-        var codePoint = parseInt(matches[0], 16);
-        if (codePoint > 0x10FFFF) {
-          this.raise("Unicode value cannot be above 0x10FFFF!");
-        }
-        if (numExpectedHexDigits<8 && unicode.isSurrogateCode(codePoint)) {
-          this.raise("Half surrogates not allowed in runes.");
-        }
-        char = String.fromCodePoint(codePoint);
-        this._curPos += numExpectedHexDigits;
+        this._curPos++;
+        var self = this;
+        char = this._parseDigits(
+          gotokenizer._HEX_REGEX, numExpectedHexDigits, 16, 0x10FFFF, 
+          function (codePoint){
+            if (numExpectedHexDigits<8 && unicode.isSurrogateCode(codePoint)) {
+              self.raise("Half surrogates not allowed in runes.");
+            }
+          });
+
         break;
-      default: this.raise("Not implemented yet");
+      default: 
+        // octal
+        char = this._parseDigits(gotokenizer._OCT_REGEX, 3, 8, 255);
+        
+        
     }
   }
   var end = this.next();
@@ -366,6 +361,30 @@ gotokenizer.Tokenizer.prototype.readRuneToken = function() {
   }
   this._curPos++;
   return this.finishToken("rune_lit", char); 
+};
+
+gotokenizer.Tokenizer.prototype._parseDigits = 
+  function(regex, num, base, max, raiseIfInvalidCodePoint) {
+  var matches = XRegExp.exec(
+    this._input, regex, this._curPos, true);
+  if(matches === null) {
+    this.raise("Expected base-" + base + " digits but found "+this.cur());
+  }
+  if(matches[0].length != num) {
+    this.raise(
+      "Expected exactly " + num + " base-" + base + " digits but " +
+      "found "+ matches[0]);
+  }
+  var codePoint = parseInt(matches[0], base);
+  if (codePoint > max) {
+    this.raise(
+      "Expected code point in base-" + base + " below " + max +
+      " but found " + codePoint);
+  }
+  if (raiseIfInvalidCodePoint) raiseIfInvalidCodePoint(codePoint);
+  
+  this._curPos += num-1;
+  return String.fromCodePoint(codePoint);
 };
 
 gotokenizer.Tokenizer.prototype.isKeyword = util.makePredicate(gotokenizer.KEYWORDS);

@@ -306,7 +306,6 @@ describe("gotokenizer.Tokenizer.readToken rune literals", function() {
     expect((new gotokenizer.Tokenizer("'\\u12e4'")).readToken()).toEqual(
       {start: 0, end: 8, type: "rune_lit", value: "ዤ"});
   });
-
   // TODO: How to support/test unicode-32?
   // '\U00101234' //legal
   // '\U00110000' // illegal: invalid Unicode code point
@@ -316,10 +315,20 @@ describe("gotokenizer.Tokenizer.readToken rune literals", function() {
   // });
   it("disallow surrogate half", function() {
     function f() {
-      (new gotokenizer.Tokenizer("'\\uDFFF'")).readToken()
+      (new gotokenizer.Tokenizer("'\\uDFFF'")).readToken();
     }
     expect(f).toThrow();
   });
+  it("octal byte value", function() {
+    expect((new gotokenizer.Tokenizer("'\\115'")).readToken()).toEqual(
+      {start: 0, end: 6, type: "rune_lit", value: "M"});
+  });
+  it("octal byte value", function() {
+    expect(function () {
+      (new gotokenizer.Tokenizer("'\\0'")).readToken()
+    }).toThrow();
+  });
+
 });
 });
 
