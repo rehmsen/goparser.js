@@ -33,7 +33,6 @@ gotokenizer.VARIADIC_OPS = ["..."];
 gotokenizer.BRACKETS = ["(", ")", "[", "]", "{", "}"];
 gotokenizer.DELIMITERS = [",", ";", ".", ":"];
 
-gotokenizer.TOK_EOF = {type: "eof"};
 
 gotokenizer._HEX_REGEX = new XRegExp("[0-9a-fA-F]+");
 gotokenizer._OCT_REGEX = new XRegExp("[0-7]+");
@@ -54,18 +53,21 @@ gotokenizer.Tokenizer = function(input, options) {
   this._curPos = 0;
   this._curLine = 1;
   this._lineStart = 0;  
-  this.skipSpace();
 };
 
 gotokenizer.Tokenizer.prototype.readToken = function() {
+  var shouldInsertSemicolon = this.skipSpaceShouldInsertSemicolon();
   this._tok.start = this._curPos;
   if (this.trackLocations) {
     this._tok.startLoc = new gotokenizer.Location(
       this._curLine, 
       this._curPos - this._lineStart);
   }
+  if (shouldInsertSemicolon) {
+    return this.finishToken('op', ';');
+  }
   if (this._curPos >= this._inputLength) {
-    return this.finishToken(gotokenizer.TOK_EOF);
+    return this.finishToken("eof", "eof");
   }
   
   var char = this.cur();
@@ -447,14 +449,20 @@ gotokenizer.Tokenizer.prototype.finishToken = function(type, value) {
   }
   this._tok.type = type;
   this._tok.value = value;
-  this.skipSpace();
   return this._tok;
 };
 
-gotokenizer.Tokenizer.prototype.skipSpace = function() {
+gotokenizer.Tokenizer.prototype.skipSpaceShouldInsertSemicolon = function() {
   var char = this.cur();
   var changed = true;
+  var firstNewline = true;
   while(this._curPos < this._inputLength && changed) {
+    if (firstNewline && (char == '\r' || char == '\n')) {
+      firstNewline = false;
+      if (this.shouldInsertSemicolon()) {
+        return true;
+      }
+    }
     changed = this.isNewlineAndSkip(char);
     char = this.cur();
     if (char == " " || char == "\t") {
@@ -470,6 +478,7 @@ gotokenizer.Tokenizer.prototype.skipSpace = function() {
       changed = true;
     }
   }
+  return false;
 };
 
 gotokenizer.Tokenizer.prototype.logPosition = function() {
@@ -487,11 +496,43 @@ gotokenizer.Tokenizer.prototype.isNewlineAndSkip = function(char) {
     this._curPos++;
     newline = true;
   }
-  if (newline) {
+  if (newline) {    
     this._curLine++;
     this._lineStart=this._curPos;
   }
   return newline;
+};
+
+gotokenizer.Tokenizer.prototype.shouldInsertSemicolon = function() {
+  switch(this._tok.type) {
+    case "int_lit":
+    case "float_lit":
+    case "imaginary_lit":
+    case "string_lit":
+    case "rune_lit":
+    case "identifier":
+      return true;
+    case "keyword":
+      switch(this._tok.value) {
+        case "break":
+        case "continue":
+        case "fallthrough":
+        case "return": 
+          return true;
+      }
+    break;
+    case "op":
+      switch(this._tok.value) {
+        case "++":
+        case "--":
+        case ")":
+        case "]":
+        case "}":
+          return true;
+      }
+      break;
+  } 
+  return false;
 };
  
 gotokenizer.Tokenizer.prototype.skipLineComment = function() {

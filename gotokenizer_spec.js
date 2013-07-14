@@ -177,50 +177,50 @@ describe("gotokenizer.Tokenizer.readToken Keyword Parsing", function() {
 describe("gotokenizer.Tokenizer.skipSpace", function() {
   it("skips multiple spaces", function() {
     var tokenizer = new gotokenizer.Tokenizer("   a");
-    tokenizer.skipSpace();
+    tokenizer.skipSpaceShouldInsertSemicolon();
     expect(tokenizer._curPos).toEqual(3);
   });
   it("skips multiple tabs", function() {
     var tokenizer = new gotokenizer.Tokenizer("\t\ta");
-    tokenizer.skipSpace();
+    tokenizer.skipSpaceShouldInsertSemicolon();
     expect(tokenizer._curPos).toEqual(2);
   });
   it("skips mixed tabs and spaces", function() {
     var tokenizer = new gotokenizer.Tokenizer("\t \t  a");
-    tokenizer.skipSpace();
+    tokenizer.skipSpaceShouldInsertSemicolon();
     expect(tokenizer._curPos).toEqual(5);
   });
   it("skips newline", function() {
     var tokenizer = new gotokenizer.Tokenizer("\na");
-    tokenizer.skipSpace();
+    tokenizer.skipSpaceShouldInsertSemicolon();
     expect(tokenizer._curPos).toEqual(1);
     expect(tokenizer._curLine).toEqual(2);
     expect(tokenizer._lineStart).toEqual(1);
   });
   it("skips multiple newline", function() {
     var tokenizer = new gotokenizer.Tokenizer("\n\n a");
-    tokenizer.skipSpace();
+    tokenizer.skipSpaceShouldInsertSemicolon();
     expect(tokenizer._curPos).toEqual(3);
     expect(tokenizer._curLine).toEqual(3);
     expect(tokenizer._lineStart).toEqual(2);
   });
   it("skips carriage return", function() {
     var tokenizer = new gotokenizer.Tokenizer("\ra");
-    tokenizer.skipSpace();
+    tokenizer.skipSpaceShouldInsertSemicolon();
     expect(tokenizer._curPos).toEqual(1);
     expect(tokenizer._curLine).toEqual(2);
     expect(tokenizer._lineStart).toEqual(1);
   });
   it("cr lf treated as one new line", function() {
     var tokenizer = new gotokenizer.Tokenizer("\r\na");
-    tokenizer.skipSpace();
+    tokenizer.skipSpaceShouldInsertSemicolon();
     expect(tokenizer._curPos).toEqual(2);
     expect(tokenizer._curLine).toEqual(2);
     expect(tokenizer._lineStart).toEqual(2);
   });
   it("lf cr treated as two new lines", function() {
     var tokenizer = new gotokenizer.Tokenizer("\n\ra");
-    tokenizer.skipSpace();
+    tokenizer.skipSpaceShouldInsertSemicolon();
     expect(tokenizer._curPos).toEqual(2);
     expect(tokenizer._curLine).toEqual(3);
     expect(tokenizer._lineStart).toEqual(2);
@@ -231,20 +231,21 @@ describe("gotokenizer.Tokenizer.readToken skip comments", function() {
   it("skips line comment at start", function() {
     var tokenizer = new gotokenizer.Tokenizer("// comment \n");
     expect(tokenizer.readToken()).toEqual(
-      {start:12, end:12, type: gotokenizer.TOK_EOF});
+      {start:12, end:12, type: "eof", value: "eof"});
     expect(tokenizer._curPos).toEqual(12);
     expect(tokenizer._curLine).toEqual(2);
     expect(tokenizer._lineStart).toEqual(12);
   });
   it("skips line comment", function() {
-    var tokenizer = new gotokenizer.Tokenizer("a\n// comment \n");
+    var tokenizer = new gotokenizer.Tokenizer("\n// comment \na");
     tokenizer.readToken();
     expect(tokenizer._curPos).toEqual(14);
     expect(tokenizer._curLine).toEqual(3);
-    expect(tokenizer._lineStart).toEqual(14);
+    expect(tokenizer._lineStart).toEqual(13);
   });
   it("skips line comment at the end of line", function() {
     var tokenizer = new gotokenizer.Tokenizer("a// comment \n");
+    tokenizer.readToken();
     tokenizer.readToken();
     expect(tokenizer._curPos).toEqual(13);
     expect(tokenizer._curLine).toEqual(2);
@@ -253,7 +254,7 @@ describe("gotokenizer.Tokenizer.readToken skip comments", function() {
   it("skips line comment at end of file", function() {
     var tokenizer = new gotokenizer.Tokenizer("// comment ");
     expect(tokenizer.readToken()).toEqual(
-      {start:11, end:11, type: gotokenizer.TOK_EOF});
+      {start:11, end:11, type: "eof", value: "eof"});
     expect(tokenizer._curPos).toEqual(11);
     expect(tokenizer._curLine).toEqual(1);
     expect(tokenizer._lineStart).toEqual(0);
@@ -261,7 +262,7 @@ describe("gotokenizer.Tokenizer.readToken skip comments", function() {
   it("skips block comment", function() {
     var tokenizer = new gotokenizer.Tokenizer("/* hello/* \nworld */");
     expect(tokenizer.readToken()).toEqual(
-      {start:20, end:20, type: gotokenizer.TOK_EOF});
+      {start:20, end:20, type: "eof", value: "eof"});
     expect(tokenizer._curPos).toEqual(20);
     expect(tokenizer._curLine).toEqual(2);
     expect(tokenizer._lineStart).toEqual(12);
@@ -271,6 +272,87 @@ describe("gotokenizer.Tokenizer.readToken skip comments", function() {
       (new gotokenizer.Tokenizer("/* hello")).readToken(); 
     }).toThrow();
   });
+});
+
+describe("gotokenizer.Tokenizer.readToken insert semicolon", function() {
+  it("after identifier", function() {
+    var tokenizer = new gotokenizer.Tokenizer("identifier\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 10, end: 10, type: "op", value: ";"});
+  });  
+  it("after literal", function() {
+    var tokenizer = new gotokenizer.Tokenizer("\"literal\"\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 9, end: 9, type: "op", value: ";"});
+  });  
+  it("after break", function() {
+    var tokenizer = new gotokenizer.Tokenizer("break\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 5, end: 5, type: "op", value: ";"});
+  });  
+  it("after continue", function() {
+    var tokenizer = new gotokenizer.Tokenizer("continue\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 8, end: 8, type: "op", value: ";"});
+  });  
+  it("after fallthrough", function() {
+    var tokenizer = new gotokenizer.Tokenizer("fallthrough\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 11, end: 11, type: "op", value: ";"});
+  });  
+  it("after return", function() {
+    var tokenizer = new gotokenizer.Tokenizer("return\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 6, end: 6, type: "op", value: ";"});
+  });  
+  it("after ++", function() {
+    var tokenizer = new gotokenizer.Tokenizer("++\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 2, end: 2, type: "op", value: ";"});
+  }); 
+  it("after return", function() {
+    var tokenizer = new gotokenizer.Tokenizer("--\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 2, end: 2, type: "op", value: ";"});
+  });  
+  it("after )", function() {
+    var tokenizer = new gotokenizer.Tokenizer(")\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 1, end: 1, type: "op", value: ";"});
+  });  
+  it("after ]", function() {
+    var tokenizer = new gotokenizer.Tokenizer("]\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 1, end: 1, type: "op", value: ";"});
+  });  
+  it("after }", function() {
+    var tokenizer = new gotokenizer.Tokenizer("}\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 1, end: 1, type: "op", value: ";"});
+  });  
+  it("not in blankline", function() {
+    var tokenizer = new gotokenizer.Tokenizer("\n");
+    expect(tokenizer.readToken()).toEqual(
+      {start: 1, end: 1, type: "eof", value: "eof"});
+  });  
+  it("not after other keywords", function() {
+    var tokenizer = new gotokenizer.Tokenizer("switch\n");
+    tokenizer.readToken();
+    expect(tokenizer.readToken()).toEqual(
+      {start: 7, end: 7, type: "eof", value: "eof"});
+  });  
+
 });
 
 
@@ -424,34 +506,6 @@ describe("gotokenizer.Tokenizer.readToken operators", function() {
       });
     })();
   }
-  // it("-", function() {
-  //   expect((new gotokenizer.Tokenizer('-')).readToken()).toEqual(
-  //     {start: 0, end: 1, type: "op", value: "-"});
-  // });
-  // it("*", function() {
-  //   expect((new gotokenizer.Tokenizer('*')).readToken()).toEqual(
-  //     {start: 0, end: 1, type: "op", value: "*"});
-  // });
-  // it("/", function() {
-  //   expect((new gotokenizer.Tokenizer('/')).readToken()).toEqual(
-  //     {start: 0, end: 1, type: "op", value: "/"});
-  // });
-  // it("%", function() {
-  //   expect((new gotokenizer.Tokenizer('%')).readToken()).toEqual(
-  //     {start: 0, end: 1, type: "op", value: "%"});
-  // });
-  // it("&", function() {
-  //   expect((new gotokenizer.Tokenizer('&')).readToken()).toEqual(
-  //     {start: 0, end: 1, type: "op", value: "&"});
-  // });
-  // it("|", function() {
-  //   expect((new gotokenizer.Tokenizer('|')).readToken()).toEqual(
-  //     {start: 0, end: 1, type: "op", value: "|"});
-  // });
-  // it("&", function() {
-  //   expect((new gotokenizer.Tokenizer('&')).readToken()).toEqual(
-  //     {start: 0, end: 1, type: "op", value: "&"});
-  // });
 });
 
 
