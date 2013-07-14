@@ -362,9 +362,6 @@ describe("gotokenizer.Tokenizer.readToken raw string literals", function() {
   });
 });
 
-"\uD800"       // illegal: surrogate half
-"\U00110000"   // illegal: invalid Unicode code point
-
 describe("gotokenizer.Tokenizer.readToken interpreted string literals", function() {
   it("hello world", function() {
     expect((new gotokenizer.Tokenizer('"hello world"')).readToken()).toEqual(
@@ -397,6 +394,16 @@ describe("gotokenizer.Tokenizer.readToken interpreted string literals", function
   it("disallow escaped single quotes in interpreted string", function() {
     expect(function () {
       (new gotokenizer.Tokenizer('"\\\'"')).readToken()
+    }).toThrow();
+  });
+  it("disallow surrogate half", function() {
+    expect(function () {
+      (new gotokenizer.Tokenizer('"\\uD800"')).readToken()
+    }).toThrow();
+  });
+  it("disallow invalid unicode code point", function() {
+    expect(function () {
+      (new gotokenizer.Tokenizer('"\\U00110000"')).readToken()
     }).toThrow();
   });
 });
