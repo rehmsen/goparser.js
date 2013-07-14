@@ -3,8 +3,7 @@ jsgoparser
 
 A parser for the Go programming language written in JavaScript.
 
-This code is still in very early stages and incomplete. Feel free to contact me if you interested. This is a weekend
-project, so it remains to see how far I'll get.
+This code is still in very early stages and incomplete. Feel free to contact me if you interested. This is a weekend project, so it remains to see how far I'll get.
 
 The code is heavily inspired by the acorn JavaScript parser, though I chose to make some stuff more object oriented. 
 We shall have to see if the performance cost for that is too high and I need to back up. 
