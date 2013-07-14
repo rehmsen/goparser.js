@@ -85,6 +85,193 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
       return this.readRawStringToken();
     case '"':
       return this.readInterpretedStringToken();
+    case '+': 
+      switch(this.next()) {
+        case '+':
+          this._curPos++;
+          return this.finishToken("op", '++');
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", '+=');
+        default:
+          return this.finishToken("op", '+');
+      }
+      break;
+    case '-': 
+      switch(this.next()) {
+        case '-':
+          this._curPos++;
+          return this.finishToken("op", '--');
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", '-=');
+        default:
+          return this.finishToken("op", '-');
+      }
+      break;
+    case '*': 
+      switch(this.next()) {
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", '*=');
+        default:
+          return this.finishToken("op", '*');
+      }
+      break;
+    case '/': 
+      switch(this.next()) {
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", '/=');
+        default:
+          return this.finishToken("op", '/');
+      }
+      break;
+    case '%': 
+      switch(this.next()) {
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", '%=');
+        default:
+          return this.finishToken("op", '%');
+      }
+      break;
+    case '&': 
+      switch(this.next()) {
+        case '&':
+          this._curPos++;
+          return this.finishToken("op", '&&');
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", '&=');
+        case '^':
+          switch(this.next()) {
+            case '=':
+              this._curPos++;
+              return this.finishToken("op", '&^=');
+            default:
+              return this.finishToken("op", '&^');
+          }
+          break;
+        case '&':
+          this._curPos++;
+          return this.finishToken("op", '&&');
+        default:
+          return this.finishToken("op", '&');
+      }
+      break;
+    case '|': 
+      switch(this.next()) {
+        case '|':
+          this._curPos++;
+          return this.finishToken("op", '||');
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", '|=');
+        case '|':
+          this._curPos++;
+          return this.finishToken("op", '||');
+        default:
+          return this.finishToken("op", '|');
+      }
+      break;
+    case '^': 
+      switch(this.next()) {
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", '^=');
+        default:
+          return this.finishToken("op", '^');
+      }
+      break;
+    case '<': 
+      switch(this.next()) {
+        case '<':
+          switch(this.next()){
+            case '=':
+              this._curPos++;
+              return this.finishToken("op", "<<=");
+            default:
+              return this.finishToken("op", "<<");   
+          }
+          break;
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", "<=");
+        case '-':
+          this._curPos++;
+          return this.finishToken("op", "<-");
+        default:
+          return this.finishToken("op", "<");
+      }
+      break;
+    case '>': 
+      switch(this.next()) {
+        case '>':
+          switch(this.next()){
+            case '=':
+              this._curPos++;
+              return this.finishToken("op", ">>=");
+            default:
+              return this.finishToken("op", ">>");   
+          }
+          break;
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", ">=");
+        default:
+          return this.finishToken("op", ">");
+      }
+      break;
+    case '=': 
+      switch(this.next()) {
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", "==");
+        default:
+          return this.finishToken("op", "=");
+      }
+      break;
+    case ':': 
+      switch(this.next()) {
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", ":=");
+        default:
+          return this.finishToken("op", ":");
+      }
+      break;
+    case '!': 
+      switch(this.next()) {
+        case '=':
+          this._curPos++;
+          return this.finishToken("op", "!=");
+        default:
+          return this.finishToken("op", "!");
+      }
+      break;
+    case '.': 
+      switch(this.next()) {
+        case '.':
+          if (this.next() != '.') {
+            this.raise("Expected ... but found ..");
+          }
+          this._curPos++;
+          return this.finishToken("op", "...");
+        default:
+          return this.finishToken("op", ".");
+      }
+      break;
+    case '(': 
+    case ')': 
+    case '[': 
+    case ']': 
+    case '{': 
+    case '}': 
+    case ';':
+    case ',':
+      this._curPos++;
+      return this.finishToken("op", char);
   }
 };
 

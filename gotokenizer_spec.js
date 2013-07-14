@@ -408,5 +408,53 @@ describe("gotokenizer.Tokenizer.readToken interpreted string literals", function
   });
 });
 
+describe("gotokenizer.Tokenizer.readToken operators", function() {
+  var operators = [
+    '+', '-', '*', '/', '%', '&', '|', '^', '<<', '>>', '&^', '+=', '-=', '*=', 
+    '/=', '%=',  '&=', '|=', '^=', '<<=', '>>=', '&^=', '=', ':=', '&&', '||', 
+    '!', '<-', '++', '--', '==', '<', '>', '!=', '<=', '>=', '...', '(', ')', 
+    '[', ']', '{', '}', ',', ';', '.', ':'];
+  
+  for(var i=0; i<operators.length; i++) {
+    (function() {
+      var op = operators[i]; 
+      it(op, function() {
+        expect((new gotokenizer.Tokenizer(op)).readToken()).toEqual(
+          {start: 0, end: op.length, type: "op", value: op});
+      });
+    })();
+  }
+  // it("-", function() {
+  //   expect((new gotokenizer.Tokenizer('-')).readToken()).toEqual(
+  //     {start: 0, end: 1, type: "op", value: "-"});
+  // });
+  // it("*", function() {
+  //   expect((new gotokenizer.Tokenizer('*')).readToken()).toEqual(
+  //     {start: 0, end: 1, type: "op", value: "*"});
+  // });
+  // it("/", function() {
+  //   expect((new gotokenizer.Tokenizer('/')).readToken()).toEqual(
+  //     {start: 0, end: 1, type: "op", value: "/"});
+  // });
+  // it("%", function() {
+  //   expect((new gotokenizer.Tokenizer('%')).readToken()).toEqual(
+  //     {start: 0, end: 1, type: "op", value: "%"});
+  // });
+  // it("&", function() {
+  //   expect((new gotokenizer.Tokenizer('&')).readToken()).toEqual(
+  //     {start: 0, end: 1, type: "op", value: "&"});
+  // });
+  // it("|", function() {
+  //   expect((new gotokenizer.Tokenizer('|')).readToken()).toEqual(
+  //     {start: 0, end: 1, type: "op", value: "|"});
+  // });
+  // it("&", function() {
+  //   expect((new gotokenizer.Tokenizer('&')).readToken()).toEqual(
+  //     {start: 0, end: 1, type: "op", value: "&"});
+  // });
+});
+
+
+
 });
 
