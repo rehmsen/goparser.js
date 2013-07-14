@@ -327,14 +327,26 @@ gotokenizer.Tokenizer.prototype.readRuneToken = function() {
       case '\\': char = '\\'; break; 
       case '\'': char = '\''; break; 
       case '"': char = '"'; break;
+      case 'x': 
+        var matches = XRegExp.exec(
+          this._input, gotokenizer._HEX_REGEX, this._curPos+1, true);
+        if(matches === null) {
+          this.raise("Expected hex decimals but found "+this.peek());
+        }
+        if(matches[0].length != 2) {
+          this.raise(
+            "Expected exactly two hex decimals but found "+ matches[0]);
+        }
+        char = String.fromCharCode(parseInt(matches[0], 16));
+        this._curPos += 2;
+        break;
       default: this.raise("Not implemented yet");
     }
   }
   var end = this.next();
   if (end != "'") {
     this.raise(
-      "Expected single character in run not beginning with \\ but " +
-      "found " + end);
+      "Expected ' after rune but found " + end);
   }
   this._curPos++;
   return this.finishToken("rune_lit", char); 

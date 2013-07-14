@@ -271,11 +271,8 @@ describe("gotokenizer.Tokenizer.readToken skip comments", function() {
 // '\000'
 // '\007'
 // '\377'
-// '\x07'
-// '\xff'
 // '\u12e4'
 // '\U00101234'
-// 'aa'         // illegal: too many characters
 // '\xa'        // illegal: too few hexadecimal digits
 // '\0'         // illegal: too few octal digits
 // '\uDFFF'     // illegal: surrogate half
@@ -301,6 +298,14 @@ describe("gotokenizer.Tokenizer.readToken rune literals", function() {
   it("special rune literals", function() {
     expect((new gotokenizer.Tokenizer("'\\t'")).readToken()).toEqual(
       {start: 0, end: 4, type: "rune_lit", value: "\t"});
+  });
+  it("hexadecimal byte value", function() {
+    expect((new gotokenizer.Tokenizer("'\\x4f'")).readToken()).toEqual(
+      {start: 0, end: 6, type: "rune_lit", value: "O"});
+  });
+  it("disallow too few hex decimals", function() {
+    var tokenizer = new gotokenizer.Tokenizer("'\\xa'");
+    expect(tokenizer.readToken).toThrow();
   });
 });
 });
