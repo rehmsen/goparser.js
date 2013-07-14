@@ -314,16 +314,30 @@ gotokenizer.Tokenizer.prototype.skipBlockComment = function() {
 
 gotokenizer.Tokenizer.prototype.readRuneToken = function() {
   var char = this.next();
-  if (char != '\\') {
-    var end = this.next();
-    if (end != "'") {
-      this.raise(
-        "Expected single character in run not beginning with \\ but " +
-        "found " + end);
+  if (char == '\\') {
+    char = this.next();
+    switch(char) {
+      case 'a': char = '\u0007'; break; 
+      case 'b': char = '\b'; break; 
+      case 'f': char = '\f'; break; 
+      case 'n': char = '\n'; break; 
+      case 'r': char = '\r'; break; 
+      case 't': char = '\t'; break; 
+      case 'v': char = '\v'; break; 
+      case '\\': char = '\\'; break; 
+      case '\'': char = '\''; break; 
+      case '"': char = '"'; break;
+      default: this.raise("Not implemented yet");
     }
-    this._curPos++;
-    return this.finishToken("rune_lit", char); 
   }
+  var end = this.next();
+  if (end != "'") {
+    this.raise(
+      "Expected single character in run not beginning with \\ but " +
+      "found " + end);
+  }
+  this._curPos++;
+  return this.finishToken("rune_lit", char); 
 };
 
 gotokenizer.Tokenizer.prototype.isKeyword = util.makePredicate(gotokenizer.KEYWORDS);
