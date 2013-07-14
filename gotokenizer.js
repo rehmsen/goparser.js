@@ -368,7 +368,7 @@ gotokenizer.Tokenizer.prototype.next = function() {
 
 gotokenizer.Tokenizer.prototype.cur = function() {
   if (this._curPos >= this._inputLength) {
-    return this._EOT;
+    return gotokenizer._EOT;
   }
   return this._input.charAt(this._curPos);
 };
@@ -456,8 +456,9 @@ gotokenizer.Tokenizer.prototype.skipSpaceShouldInsertSemicolon = function() {
   var char = this.cur();
   var changed = true;
   var firstNewline = true;
-  while(this._curPos < this._inputLength && changed) {
-    if (firstNewline && (char == '\r' || char == '\n')) {
+  while(this._curPos <= this._inputLength && changed) {
+    if (firstNewline && 
+        (char == '\r' || char == '\n' || char == gotokenizer._EOT)) {
       firstNewline = false;
       if (this.shouldInsertSemicolon()) {
         return true;
@@ -545,7 +546,7 @@ gotokenizer.Tokenizer.prototype.skipLineComment = function() {
 gotokenizer.Tokenizer.prototype.skipBlockComment = function() {
   while (!this.startsWithAndSkip("*/")) {
     if (!this.isNewlineAndSkip(this.cur())) this.next();
-    if (this.cur() == this._EOT) {
+    if (this.cur() == gotokenizer._EOT) {
       this.raise("Unexpected end of input.");
     }
   }
@@ -556,7 +557,7 @@ gotokenizer.Tokenizer.prototype.readRawStringToken = function() {
   var lastIndex = this._curPos;
   var value = "";
   while (!this.startsWithAndSkip('`')) {
-    if (char == this._EOT) {
+    if (char == gotokenizer._EOT) {
       this.raise("Unexpected end of input.");
     }
     if (char == '\r') {
@@ -574,7 +575,7 @@ gotokenizer.Tokenizer.prototype.readInterpretedStringToken = function() {
   var value = "";
   this._curPos++;
   while (!this.startsWithAndSkip('"')) {
-    if (this.cur() == this._EOT) {
+    if (this.cur() == gotokenizer._EOT) {
       this.raise("Unexpected end of input.");
     }
     value += this._parseRune(true);
