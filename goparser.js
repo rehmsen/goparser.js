@@ -44,7 +44,8 @@ goparser.Parser.prototype.parseBasicLitNode = function() {
       var basicLitNode = {
         type: this._curToken.type,
         value: this._curToken.value,
-        loc: this._curToken.loc};
+        loc: this._curToken.loc,
+      };
       this.next();
       return basicLitNode;
     default:
@@ -67,11 +68,11 @@ goparser.Parser.prototype.parseIdentifierOrQualifiedIdentNode = function() {
     type: "QualifiedIdent",
     loc: this.mergeLoc(identifierToken.loc, identifierToken2.loc),
     package: identifierToken.value,
-    name: identifierToken2.value
+    name: identifierToken2.value,
   };
 };
 
-goparser.Parser.prototype.parsePrimaryExpNode = function() {
+goparser.Parser.prototype.parsePrimaryExprNode = function() {
   var operandNode = this.parseOperandNode();
   if (operandNode) return operandNode;
 
@@ -96,11 +97,37 @@ goparser.Parser.prototype.parseExpressionNode = function() {
 
 goparser.Parser.prototype.parseUnaryExprNode = function() {
   var primaryExprNode = this.parsePrimaryExprNode();
-  if(primaryExprNode) return primaryExprNode;
+  if (primaryExprNode) return primaryExprNode;
 
-  // TODO(olrehm): unary_op UnaryExpr
-  
-  return null;
+  var start = this._curToken.loc.start;
+  var unaryOp = this.parseUnaryOp();
+  if (!unaryOp) return null;
+  var unaryExprNode = this.parseUnaryExprNode();
+  if (!unaryExprNode) return null;
+  return {
+    type: "UnaryExpr",
+    loc: {start: start, end: unaryExprNode.loc.end},
+    op: unaryOp,
+    arg: unaryExprNode,
+    isPrefix: true,
+  };
+};
+
+goparser.Parser.prototype.parseUnaryOp = function() {
+  switch(this._curToken.type) {
+    case "+":
+    case "-":
+    case "!":
+    case "^":
+    case "*":
+    case "&":
+    case "<-":
+      var unaryOp = this._curToken.type;
+      this.next();
+      return unaryOp;
+    default:
+      return null;
+  }
 };
 
 goparser.Parser.prototype.next = function() {
@@ -110,7 +137,7 @@ goparser.Parser.prototype.next = function() {
 goparser.Parser.prototype.accept = function(type) {
   if (this._curToken.type == type) {
     var acceptedToken = this._curToken;
-    this._curToken = this.tokenizer.readToken();
+    this.next();
     return acceptedToken;
   }
   return null;
