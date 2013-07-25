@@ -11,38 +11,6 @@ goparser.Parser = function(input, options) {
   this._curToken = this.tokenizer.readToken();
 };
 
-goparser.Parser.prototype.parseExpressionNode = function() {
-  var unaryExprNode = this.parseUnaryExprNode();
-  if(unaryExprNode) return unaryExprNode;
-  
-  // TODO(olrehm): Expression binary_op UnaryExpr
-  
-  return null;
-};
-
-goparser.Parser.prototype.parseUnaryExprNode = function() {
-  var primaryExprNode = this.parsePrimaryExprNode();
-  if(primaryExprNode) return primaryExprNode;
-
-  // TODO(olrehm): unary_op UnaryExpr
-  
-  return null;
-};
-
-goparser.Parser.prototype.parsePrimaryExpNode = function() {
-  var operandNode = this.parseOperandNode();
-  if (operandNode) return operandNode;
-
-  // TODO(olrehm): Conversion
-  // TODO(olrehm): BuiltinCall
-  // TODO(olrehm): PrimaryExpr Selector
-  // TODO(olrehm): PrimaryExpr Index
-  // TODO(olrehm): PrimaryExpr Slice
-  // TODO(olrehm): PrimaryExpr TypeAssertion
-  // TODO(olrehm): PrimaryExpr Call
-  return null;
-};
-
 goparser.Parser.prototype.parseOperandNode = function() {
   var literalNode = this.parseLiteralNode();
   if (literalNode) return literalNode;  
@@ -103,6 +71,37 @@ goparser.Parser.prototype.parseIdentifierOrQualifiedIdentNode = function() {
   };
 };
 
+goparser.Parser.prototype.parsePrimaryExpNode = function() {
+  var operandNode = this.parseOperandNode();
+  if (operandNode) return operandNode;
+
+  // TODO(olrehm): Conversion
+  // TODO(olrehm): BuiltinCall
+  // TODO(olrehm): PrimaryExpr Selector
+  // TODO(olrehm): PrimaryExpr Index
+  // TODO(olrehm): PrimaryExpr Slice
+  // TODO(olrehm): PrimaryExpr TypeAssertion
+  // TODO(olrehm): PrimaryExpr Call
+  return null;
+};
+
+goparser.Parser.prototype.parseExpressionNode = function() {
+  var unaryExprNode = this.parseUnaryExprNode();
+  if(unaryExprNode) return unaryExprNode;
+  
+  // TODO(olrehm): Expression binary_op UnaryExpr
+  
+  return null;
+};
+
+goparser.Parser.prototype.parseUnaryExprNode = function() {
+  var primaryExprNode = this.parsePrimaryExprNode();
+  if(primaryExprNode) return primaryExprNode;
+
+  // TODO(olrehm): unary_op UnaryExpr
+  
+  return null;
+};
 
 goparser.Parser.prototype.next = function() {
   this._curToken = this.tokenizer.readToken();
