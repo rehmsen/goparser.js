@@ -30,38 +30,66 @@ describe("goparser.Parser.parseIdentifierOrQualifiedIdentNode", function() {
 describe("goparser.Parser.parseUnaryExprNode", function() {
   it("+17 parsed as UnaryExpr", function() {
     var parser = new goparser.Parser("+17", {trackLocations: true});
-    expect(parser.parseUnaryExprNode())
-      .toEqual({loc: {start: {line: 1, column: 0}, end: {line: 1, column:3}}, 
-                type: "UnaryExpr", 
-                op: "+", 
-                arg: {
-                  loc: {start: {line: 1, column: 1}, end: {line: 1, column:3}},
-                  type: "int_lit",
-                  value: 17,
-                },
-                isPrefix: true
-                });
+    expect(parser.parseUnaryExprNode()).toEqual(
+        {loc: {start: {line: 1, column: 0}, end: {line: 1, column:3}}, 
+          type: "UnaryExpr", 
+          operator: "+", 
+          argument: {
+            loc: {start: {line: 1, column: 1}, end: {line: 1, column:3}},
+            type: "int_lit",
+            value: 17,
+          },
+          prefix: true
+          });
     expect(parser._curToken.type).toEqual(";");
   });
   it("*&sheeps parsed as UnaryExpr", function() {
     var parser = new goparser.Parser("*&sheeps", {trackLocations: true});
-    expect(parser.parseUnaryExprNode())
-      .toEqual({loc: {start: {line: 1, column: 0}, end: {line: 1, column:8}}, 
-                type: "UnaryExpr", 
-                op: "*", 
-                arg: {
-                  loc: {start: {line: 1, column: 1}, end: {line: 1, column:8}},
-                  type: "UnaryExpr",
-                  op: "&",
-                  arg: {
-                    loc: {start: {line: 1, column: 2}, end: {line: 1, column:8}},
-                    type: "Identifier",
-                    name: "sheeps"
-                  },
-                  isPrefix: true,
-                },
-                isPrefix: true,
-                });
+    expect(parser.parseUnaryExprNode()).toEqual(
+        {loc: {start: {line: 1, column: 0}, end: {line: 1, column:8}}, 
+          type: "UnaryExpr", 
+          operator: "*", 
+          argument: {
+            loc: {start: {line: 1, column: 1}, end: {line: 1, column:8}},
+            type: "UnaryExpr",
+            operator: "&",
+            argument: {
+              loc: {start: {line: 1, column: 2}, end: {line: 1, column:8}},
+              type: "Identifier",
+              name: "sheeps"
+            },
+            prefix: true,
+          },
+          prefix: true,
+          });
+    expect(parser._curToken.type).toEqual(";");
+  });
+});
+
+describe("goparser.Parser.parseExpressionNode", function() {
+  it("true || !false parsed as Expression", function() {
+    var parser = new goparser.Parser("true || !false", {trackLocations: true});
+    expect(parser.parseExpressionNode()).toEqual(
+        {loc: {start: {line: 1, column: 0}, end: {line: 1, column:14}}, 
+          type: "Expression", 
+          operator: "||", 
+          left: {
+            loc: {start: {line: 1, column: 0}, end: {line: 1, column:4}},
+            type: "Identifier",
+            name: "true",
+          },
+          right: {
+            loc: {start: {line: 1, column: 8}, end: {line: 1, column:14}},
+            type: "UnaryExpr",
+            operator: "!",
+            argument: {
+              loc: {start: {line: 1, column: 9}, end: {line: 1, column:14}},
+              type: "Indentifier",
+              name: "false",
+            },
+            prefix: true
+          },
+          });
     expect(parser._curToken.type).toEqual(";");
   });
 });

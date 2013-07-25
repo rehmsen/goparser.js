@@ -88,9 +88,21 @@ goparser.Parser.prototype.parsePrimaryExprNode = function() {
 
 goparser.Parser.prototype.parseExpressionNode = function() {
   var unaryExprNode = this.parseUnaryExprNode();
-  if(unaryExprNode) return unaryExprNode;
+  if (unaryExprNode) return unaryExprNode;
   
-  // TODO(olrehm): Expression binary_op UnaryExpr
+  var expressionNode = this.parseExpressionNode();
+  if (!expressionNode) return null;
+  var binaryOp = this.parseBinaryOp();
+  if (!binaryOp) return null;
+  var unaryExprNode = this.parseUnaryExprNode();
+  if (!unaryExprNode) return null;
+  return {
+    type: "Expression",
+    loc: this.mergeLoc(expressionNode.loc, unaryExprNode.loc),
+    operator: binaryOp,
+    left: expressionNode,
+    right: unaryExprNode
+  };
   
   return null;
 };
@@ -107,10 +119,38 @@ goparser.Parser.prototype.parseUnaryExprNode = function() {
   return {
     type: "UnaryExpr",
     loc: {start: start, end: unaryExprNode.loc.end},
-    op: unaryOp,
-    arg: unaryExprNode,
-    isPrefix: true,
+    operator: unaryOp,
+    argument: unaryExprNode,
+    prefix: true,
   };
+};
+
+goparser.Parser.prototype.parseBinaryOp = function() {
+  switch(this._curToken.type) {
+    case "||":
+    case "&&":
+    case "==":
+    case "!=":
+    case "<":
+    case "<=":
+    case ">=":
+    case "+":
+    case "-":
+    case "|":
+    case "^":
+    case "*":
+    case "/":
+    case "%":
+    case "<<":
+    case ">>":
+    case "&":
+    case "&^":
+      var binaryOp = this._curToken.type;
+      this.next();
+      return binaryOp;
+    default:
+      return null;
+  }
 };
 
 goparser.Parser.prototype.parseUnaryOp = function() {
