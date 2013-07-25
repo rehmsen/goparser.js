@@ -10,19 +10,19 @@ describe("goparser.Parser.parseBasicLitNode", function() {
   });
 });
 
-describe("goparser.Parser.parseOperandNameNode", function() {
+describe("goparser.Parser.parseIdentifierOrQualifiedIdentNode", function() {
   it("Println parsed as Identifier", function() {
     var parser = new goparser.Parser("Println", {trackLocations: true});
-    expect(parser.parseOperandNameNode())
+    expect(parser.parseIdentifierOrQualifiedIdentNode())
       .toEqual({loc: {start: {line: 1, column: 0}, end: {line: 1, column:7}}, 
                 type: "Identifier", name: "Println"});
     expect(parser._curToken.type).toEqual(";");
   });
-  it("fmt.Println parsed as QualifiedIdentifier", function() {
+  it("fmt.Println parsed as QualifiedIdent", function() {
     var parser = new goparser.Parser("fmt.Println", {trackLocations: true});
-    expect(parser.parseOperandNameNode())
+    expect(parser.parseIdentifierOrQualifiedIdentNode())
       .toEqual({loc: {start: {line: 1, column: 0}, end: {line: 1, column:11}}, 
-                type: "QualifiedIdentifier", package: "fmt", name: "Println"});
+                type: "QualifiedIdent", package: "fmt", name: "Println"});
     expect(parser._curToken.type).toEqual(";");
   });
 });

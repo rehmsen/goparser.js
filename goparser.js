@@ -11,6 +11,61 @@ goparser.Parser = function(input, options) {
   this._curToken = this.tokenizer.readToken();
 };
 
+goparser.Parser.prototype.parseExpressionNode = function() {
+  var unaryExprNode = this.parseUnaryExprNode();
+  if(unaryExprNode) return unaryExprNode;
+  
+  // TODO(olrehm): Expression binary_op UnaryExpr
+  
+  return null;
+};
+
+goparser.Parser.prototype.parseUnaryExprNode = function() {
+  var primaryExprNode = this.parsePrimaryExprNode();
+  if(primaryExprNode) return primaryExprNode;
+
+  // TODO(olrehm): unary_op UnaryExpr
+  
+  return null;
+};
+
+goparser.Parser.prototype.parsePrimaryExpNode = function() {
+  var operandNode = this.parseOperandNode();
+  if (operandNode) return operandNode;
+
+  // TODO(olrehm): Conversion
+  // TODO(olrehm): BuiltinCall
+  // TODO(olrehm): PrimaryExpr Selector
+  // TODO(olrehm): PrimaryExpr Index
+  // TODO(olrehm): PrimaryExpr Slice
+  // TODO(olrehm): PrimaryExpr TypeAssertion
+  // TODO(olrehm): PrimaryExpr Call
+  return null;
+};
+
+goparser.Parser.prototype.parseOperandNode = function() {
+  var literalNode = this.parseLiteralNode();
+  if (literalNode) return literalNode;  
+
+  var operandNameNode = this.parseIdentifierOrQualifiedIdentNode();
+  if (operandNameNode) return operandNameNode;
+  
+  // TODO(olrehm): MethodExpr
+  // TODO(olrehm): (Expression)
+  
+  return null;
+};
+
+goparser.Parser.prototype.parseLiteralNode = function() {
+  var basicLitNode = this.parseBasicLitNode();
+  if (basicLitNode) return basicLitNode; 
+  
+  // TODO(olrehm): CompositeLit
+  // TODO(olrehm): FunctionLit
+  
+  return null;
+};
+
 goparser.Parser.prototype.parseBasicLitNode = function() {
   switch(this._curToken.type) {
     case "int_lit":
@@ -29,7 +84,7 @@ goparser.Parser.prototype.parseBasicLitNode = function() {
   }
 };
 
-goparser.Parser.prototype.parseOperandNameNode = function() {
+goparser.Parser.prototype.parseIdentifierOrQualifiedIdentNode = function() {
   var identifierToken = this.accept("identifier");
   if (!identifierToken) return null;
   
@@ -41,7 +96,7 @@ goparser.Parser.prototype.parseOperandNameNode = function() {
   }
   var identifierToken2 = this.accept("identifier");
   return {
-    type: "QualifiedIdentifier",
+    type: "QualifiedIdent",
     loc: this.mergeLoc(identifierToken.loc, identifierToken2.loc),
     package: identifierToken.value,
     name: identifierToken2.value
