@@ -19,9 +19,18 @@ goparser.Parser.prototype.parseOperandNode = function() {
   if (operandNameNode) return operandNameNode;
   
   // TODO(olrehm): MethodExpr
-  // TODO(olrehm): (Expression)
   
-  return null;
+  var leftParenthesis = this.accept("(");  
+  if (!leftParenthesis) return null;
+  var expressionNode = this.parseExpressionNode();
+  if (!expressionNode) return null;
+  var rightParenthesis = this.accept(")")
+  if (!rightParenthesis) return null;
+  return {
+    type: "ParenExpr",
+    loc: this.mergeLoc(leftParenthesis.loc, rightParenthesis.loc),
+    argument: expressionNode
+  };
 };
 
 goparser.Parser.prototype.parseLiteralNode = function() {
@@ -87,6 +96,7 @@ goparser.Parser.prototype.parsePrimaryExprNode = function() {
 };
 
 goparser.Parser.prototype.parseExpressionNode = function() {
+  // FIXME(olrehm): This always eats identifiers at will ignore the operator.
   var unaryExprNode = this.parseUnaryExprNode();
   if (unaryExprNode) return unaryExprNode;
   
