@@ -279,67 +279,67 @@ describe("gotokenizer.Tokenizer.readToken insert semicolon", function() {
     var tokenizer = new gotokenizer.Tokenizer("identifier\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 10, end: 10, type: "op", value: ";"});
+      {start: 10, end: 10, type: ";"});
   });  
   it("after literal", function() {
     var tokenizer = new gotokenizer.Tokenizer("\"literal\"\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 9, end: 9, type: "op", value: ";"});
+      {start: 9, end: 9, type: ";"});
   });  
   it("after break", function() {
     var tokenizer = new gotokenizer.Tokenizer("break\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 5, end: 5, type: "op", value: ";"});
+      {start: 5, end: 5, type: ";"});
   });  
   it("after continue", function() {
     var tokenizer = new gotokenizer.Tokenizer("continue\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 8, end: 8, type: "op", value: ";"});
+      {start: 8, end: 8, type: ";"});
   });  
   it("after fallthrough", function() {
     var tokenizer = new gotokenizer.Tokenizer("fallthrough\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 11, end: 11, type: "op", value: ";"});
+      {start: 11, end: 11, type: ";"});
   });  
   it("after return", function() {
     var tokenizer = new gotokenizer.Tokenizer("return\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 6, end: 6, type: "op", value: ";"});
+      {start: 6, end: 6, type: ";"});
   });  
   it("after ++", function() {
     var tokenizer = new gotokenizer.Tokenizer("++\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 2, end: 2, type: "op", value: ";"});
+      {start: 2, end: 2, type: ";"});
   }); 
   it("after return", function() {
     var tokenizer = new gotokenizer.Tokenizer("--\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 2, end: 2, type: "op", value: ";"});
+      {start: 2, end: 2, type: ";"});
   });  
   it("after )", function() {
     var tokenizer = new gotokenizer.Tokenizer(")\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 1, end: 1, type: "op", value: ";"});
+      {start: 1, end: 1, type: ";"});
   });  
   it("after ]", function() {
     var tokenizer = new gotokenizer.Tokenizer("]\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 1, end: 1, type: "op", value: ";"});
+      {start: 1, end: 1, type: ";"});
   });  
   it("after }", function() {
     var tokenizer = new gotokenizer.Tokenizer("}\n");
     tokenizer.readToken();
     expect(tokenizer.readToken()).toEqual(
-      {start: 1, end: 1, type: "op", value: ";"});
+      {start: 1, end: 1, type: ";"});
   });  
   it("not in blankline", function() {
     var tokenizer = new gotokenizer.Tokenizer("\n");
@@ -502,7 +502,7 @@ describe("gotokenizer.Tokenizer.readToken operators", function() {
       var op = operators[i]; 
       it(op, function() {
         expect((new gotokenizer.Tokenizer(op)).readToken()).toEqual(
-          {start: 0, end: op.length, type: "op", value: op});
+          {start: 0, end: op.length, type: op});
       });
     })();
   }
@@ -518,13 +518,13 @@ describe("gotokenizer.Tokenizer integration test", function() {
     expect(tokenizer.readToken()).toEqual(
       {start: 8, end: 12, type: "identifier", value: "main"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 12, end: 12, type: "op", value: ";"});
+      {start: 12, end: 12, type: ";"});
     expect(tokenizer.readToken()).toEqual(
       {start: 14, end: 20, type: "keyword", value: "import"});
     expect(tokenizer.readToken()).toEqual(
       {start: 21, end: 26, type: "string_lit", value: "fmt"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 26, end: 26, type: "op", value: ";"});
+      {start: 26, end: 26, type: ";"});
     expect(tokenizer.readToken()).toEqual(
       {start: 28, end: 32, type: "keyword", value: "type"});
     expect(tokenizer.readToken()).toEqual(
@@ -532,108 +532,108 @@ describe("gotokenizer.Tokenizer integration test", function() {
     expect(tokenizer.readToken()).toEqual(
       {start: 40, end: 46, type: "keyword", value: "struct"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 47, end: 48, type: "op", value: "{"});
+      {start: 47, end: 48, type: "{"});
     expect(tokenizer.readToken()).toEqual(
       {start: 53, end: 56, type: "identifier", value: "Lat"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 56, end: 57, type: "op", value: ","});
+      {start: 56, end: 57, type: ","});
     expect(tokenizer.readToken()).toEqual(
       {start: 58, end: 62, type: "identifier", value: "Long"});
     expect(tokenizer.readToken()).toEqual(
       {start: 63, end: 70, type: "identifier", value: "float64"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 70, end: 70, type: "op", value: ";"});
+      {start: 70, end: 70, type: ";"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 71, end: 72, type: "op", value: "}"});
+      {start: 71, end: 72, type: "}"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 72, end: 72, type: "op", value: ";"});
+      {start: 72, end: 72, type: ";"});
     expect(tokenizer.readToken()).toEqual(
       {start: 74, end: 77, type: "keyword", value: "var"});
     expect(tokenizer.readToken()).toEqual(
       {start: 78, end: 79, type: "identifier", value: "m"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 80, end: 81, type: "op", value: "="});
+      {start: 80, end: 81, type: "="});
     expect(tokenizer.readToken()).toEqual(
       {start: 82, end: 85, type: "keyword", value: "map"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 85, end: 86, type: "op", value: "["});
+      {start: 85, end: 86, type: "["});
     expect(tokenizer.readToken()).toEqual(
       {start: 86, end: 92, type: "identifier", value: "string"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 92, end: 93, type: "op", value: "]"});
+      {start: 92, end: 93, type: "]"});
     expect(tokenizer.readToken()).toEqual(
       {start: 93, end: 99, type: "identifier", value: "Vertex"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 99, end: 100, type: "op", value: "{"});
+      {start: 99, end: 100, type: "{"});
     expect(tokenizer.readToken()).toEqual(
       {start: 105, end: 116, type: "string_lit", value: "Bell Labs"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 116, end: 117, type: "op", value: ":"});
+      {start: 116, end: 117, type: ":"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 118, end: 119, type: "op", value: "{"});
+      {start: 118, end: 119, type: "{"});
     expect(tokenizer.readToken()).toEqual(
       {start: 119, end: 127, type: "float_lit", value: 40.68433});
     expect(tokenizer.readToken()).toEqual(
-      {start: 127, end: 128, type: "op", value: ","});
+      {start: 127, end: 128, type: ","});
     expect(tokenizer.readToken()).toEqual(
-      {start: 129, end: 130, type: "op", value: "-"});
+      {start: 129, end: 130, type: "-"});
     expect(tokenizer.readToken()).toEqual(
       {start: 130, end: 138, type: "float_lit", value: 74.39967});
     expect(tokenizer.readToken()).toEqual(
-      {start: 138, end: 139, type: "op", value: "}"});
+      {start: 138, end: 139, type: "}"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 139, end: 140, type: "op", value: ","});
+      {start: 139, end: 140, type: ","});
     expect(tokenizer.readToken()).toEqual(
       {start: 145, end: 153, type: "string_lit", value: "Google"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 153, end: 154, type: "op", value: ":"});
+      {start: 153, end: 154, type: ":"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 158, end: 159, type: "op", value: "{"});
+      {start: 158, end: 159, type: "{"});
     expect(tokenizer.readToken()).toEqual(
       {start: 159, end: 167, type: "float_lit", value: 37.42202});
     expect(tokenizer.readToken()).toEqual(
-      {start: 167, end: 168, type: "op", value: ","});
+      {start: 167, end: 168, type: ","});
     expect(tokenizer.readToken()).toEqual(
-      {start: 169, end: 170, type: "op", value: "-"});
+      {start: 169, end: 170, type: "-"});
     expect(tokenizer.readToken()).toEqual(
       {start: 170, end: 179, type: "float_lit", value: 122.08408});
     expect(tokenizer.readToken()).toEqual(
-      {start: 179, end: 180, type: "op", value: "}"});
+      {start: 179, end: 180, type: "}"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 180, end: 181, type: "op", value: ","});
+      {start: 180, end: 181, type: ","});
     expect(tokenizer.readToken()).toEqual(
-      {start: 182, end: 183, type: "op", value: "}"});
+      {start: 182, end: 183, type: "}"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 183, end: 183, type: "op", value: ";"});
+      {start: 183, end: 183, type: ";"});
     expect(tokenizer.readToken()).toEqual(
       {start: 185, end: 189, type: "keyword", value: "func"});
     expect(tokenizer.readToken()).toEqual(
       {start: 190, end: 194, type: "identifier", value: "main"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 194, end: 195, type: "op", value: "("});
+      {start: 194, end: 195, type: "("});
     expect(tokenizer.readToken()).toEqual(
-      {start: 195, end: 196, type: "op", value: ")"});
+      {start: 195, end: 196, type: ")"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 197, end: 198, type: "op", value: "{"});
+      {start: 197, end: 198, type: "{"});
     expect(tokenizer.readToken()).toEqual(
       {start: 203, end: 206, type: "identifier", value: "fmt"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 206, end: 207, type: "op", value: "."});
+      {start: 206, end: 207, type: "."});
     expect(tokenizer.readToken()).toEqual(
       {start: 207, end: 214, type: "identifier", value: "Println"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 214, end: 215, type: "op", value: "("});
+      {start: 214, end: 215, type: "("});
     expect(tokenizer.readToken()).toEqual(
       {start: 215, end: 216, type: "identifier", value: "m"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 216, end: 217, type: "op", value: ")"});
+      {start: 216, end: 217, type: ")"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 217, end: 217, type: "op", value: ";"});
+      {start: 217, end: 217, type: ";"});
     expect(tokenizer.readToken()).toEqual(
-      {start: 218, end: 219, type: "op", value: "}"});
+      {start: 218, end: 219, type: "}"});
     console.log(tokenizer._curPos + ": " +  (tokenizer.cur() == gotokenizer._EOT))
     expect(tokenizer.readToken()).toEqual(
-      {start: 219, end: 219, type: "op", value: ";"});
+      {start: 219, end: 219, type: ";"});
     expect(tokenizer.readToken()).toEqual(
       {start: 219, end: 219, type: "eof", value: "eof"});
   });

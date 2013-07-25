@@ -46,7 +46,7 @@ gotokenizer.Tokenizer = function(input, options) {
   this._inputLength = this._input.length;
   
   options = options || {};
-  this._trackLocations = options.trackLocations || true;
+  this._trackLocations = options.trackLocations || false;
 
   this._tok = {};
 
@@ -58,13 +58,11 @@ gotokenizer.Tokenizer = function(input, options) {
 gotokenizer.Tokenizer.prototype.readToken = function() {
   var shouldInsertSemicolon = this.skipSpaceShouldInsertSemicolon();
   this._tok.start = this._curPos;
-  if (this.trackLocations) {
-    this._tok.startLoc = new gotokenizer.Location(
-      this._curLine, 
-      this._curPos - this._lineStart);
+  if (this._trackLocations) {
+    this._tok.loc = {start: this._createLocation()};
   }
   if (shouldInsertSemicolon) {
-    return this.finishToken('op', ';');
+    return this.finishToken(";");
   }
   if (this._curPos >= this._inputLength) {
     return this.finishToken("eof", "eof");
@@ -91,99 +89,99 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
       switch(this.next()) {
         case '+':
           this._curPos++;
-          return this.finishToken("op", '++');
+          return this.finishToken("++");
         case '=':
           this._curPos++;
-          return this.finishToken("op", '+=');
+          return this.finishToken("+=");
         default:
-          return this.finishToken("op", '+');
+          return this.finishToken("+");
       }
       break;
     case '-': 
       switch(this.next()) {
         case '-':
           this._curPos++;
-          return this.finishToken("op", '--');
+          return this.finishToken('--');
         case '=':
           this._curPos++;
-          return this.finishToken("op", '-=');
+          return this.finishToken('-=');
         default:
-          return this.finishToken("op", '-');
+          return this.finishToken('-');
       }
       break;
     case '*': 
       switch(this.next()) {
         case '=':
           this._curPos++;
-          return this.finishToken("op", '*=');
+          return this.finishToken('*=');
         default:
-          return this.finishToken("op", '*');
+          return this.finishToken('*');
       }
       break;
     case '/': 
       switch(this.next()) {
         case '=':
           this._curPos++;
-          return this.finishToken("op", '/=');
+          return this.finishToken('/=');
         default:
-          return this.finishToken("op", '/');
+          return this.finishToken('/');
       }
       break;
     case '%': 
       switch(this.next()) {
         case '=':
           this._curPos++;
-          return this.finishToken("op", '%=');
+          return this.finishToken('%=');
         default:
-          return this.finishToken("op", '%');
+          return this.finishToken('%');
       }
       break;
     case '&': 
       switch(this.next()) {
         case '&':
           this._curPos++;
-          return this.finishToken("op", '&&');
+          return this.finishToken('&&');
         case '=':
           this._curPos++;
-          return this.finishToken("op", '&=');
+          return this.finishToken('&=');
         case '^':
           switch(this.next()) {
             case '=':
               this._curPos++;
-              return this.finishToken("op", '&^=');
+              return this.finishToken('&^=');
             default:
-              return this.finishToken("op", '&^');
+              return this.finishToken('&^');
           }
           break;
         case '&':
           this._curPos++;
-          return this.finishToken("op", '&&');
+          return this.finishToken('&&');
         default:
-          return this.finishToken("op", '&');
+          return this.finishToken('&');
       }
       break;
     case '|': 
       switch(this.next()) {
         case '|':
           this._curPos++;
-          return this.finishToken("op", '||');
+          return this.finishToken('||');
         case '=':
           this._curPos++;
-          return this.finishToken("op", '|=');
+          return this.finishToken('|=');
         case '|':
           this._curPos++;
-          return this.finishToken("op", '||');
+          return this.finishToken('||');
         default:
-          return this.finishToken("op", '|');
+          return this.finishToken('|');
       }
       break;
     case '^': 
       switch(this.next()) {
         case '=':
           this._curPos++;
-          return this.finishToken("op", '^=');
+          return this.finishToken('^=');
         default:
-          return this.finishToken("op", '^');
+          return this.finishToken('^');
       }
       break;
     case '<': 
@@ -192,19 +190,19 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
           switch(this.next()){
             case '=':
               this._curPos++;
-              return this.finishToken("op", "<<=");
+              return this.finishToken("<<=");
             default:
-              return this.finishToken("op", "<<");   
+              return this.finishToken("<<");   
           }
           break;
         case '=':
           this._curPos++;
-          return this.finishToken("op", "<=");
+          return this.finishToken("<=");
         case '-':
           this._curPos++;
-          return this.finishToken("op", "<-");
+          return this.finishToken("<-");
         default:
-          return this.finishToken("op", "<");
+          return this.finishToken("<");
       }
       break;
     case '>': 
@@ -213,43 +211,43 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
           switch(this.next()){
             case '=':
               this._curPos++;
-              return this.finishToken("op", ">>=");
+              return this.finishToken(">>=");
             default:
-              return this.finishToken("op", ">>");   
+              return this.finishToken(">>");   
           }
           break;
         case '=':
           this._curPos++;
-          return this.finishToken("op", ">=");
+          return this.finishToken(">=");
         default:
-          return this.finishToken("op", ">");
+          return this.finishToken(">");
       }
       break;
     case '=': 
       switch(this.next()) {
         case '=':
           this._curPos++;
-          return this.finishToken("op", "==");
+          return this.finishToken("==");
         default:
-          return this.finishToken("op", "=");
+          return this.finishToken("=");
       }
       break;
     case ':': 
       switch(this.next()) {
         case '=':
           this._curPos++;
-          return this.finishToken("op", ":=");
+          return this.finishToken(":=");
         default:
-          return this.finishToken("op", ":");
+          return this.finishToken(":");
       }
       break;
     case '!': 
       switch(this.next()) {
         case '=':
           this._curPos++;
-          return this.finishToken("op", "!=");
+          return this.finishToken("!=");
         default:
-          return this.finishToken("op", "!");
+          return this.finishToken("!");
       }
       break;
     case '.': 
@@ -259,9 +257,9 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
             this.raise("Expected ... but found ..");
           }
           this._curPos++;
-          return this.finishToken("op", "...");
+          return this.finishToken("...");
         default:
-          return this.finishToken("op", ".");
+          return this.finishToken(".");
       }
       break;
     case '(': 
@@ -273,7 +271,7 @@ gotokenizer.Tokenizer.prototype.readToken = function() {
     case ';':
     case ',':
       this._curPos++;
-      return this.finishToken("op", char);
+      return this.finishToken(char);
   }
 };
 
@@ -440,12 +438,14 @@ gotokenizer.Tokenizer.prototype.readWord = function() {
   return this._input.slice(this._tok.start, this._curPos);
 };
 
+gotokenizer.Tokenizer.prototype._createLocation = function() {
+  return {line: this._curLine, column: this._curPos - this._lineStart};
+};
+
 gotokenizer.Tokenizer.prototype.finishToken = function(type, value) {
   this._tok.end = this._curPos;
-  if (this.trackLocations) {
-    this._tok.endLoc = new gotokenizer.Location(
-      this._curLine, 
-      this._curPos - this._lineStart);
+  if (this._trackLocations) {
+    this._tok.loc.end = this._createLocation();
   }
   this._tok.type = type;
   this._tok.value = value;
@@ -522,16 +522,12 @@ gotokenizer.Tokenizer.prototype.shouldInsertSemicolon = function() {
           return true;
       }
     break;
-    case "op":
-      switch(this._tok.value) {
-        case "++":
-        case "--":
-        case ")":
-        case "]":
-        case "}":
-          return true;
-      }
-      break;
+    case "++":
+    case "--":
+    case ")":
+    case "]":
+    case "}":
+      return true;
   } 
   return false;
 };
