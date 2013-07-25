@@ -57,6 +57,7 @@ gotokenizer.Tokenizer = function(input, options) {
 
 gotokenizer.Tokenizer.prototype.readToken = function() {
   var shouldInsertSemicolon = this.skipSpaceShouldInsertSemicolon();
+  this._tok = {};
   this._tok.start = this._curPos;
   if (this._trackLocations) {
     this._tok.loc = {start: this._createLocation()};

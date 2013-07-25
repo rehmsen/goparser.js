@@ -29,9 +29,44 @@ goparser.Parser.prototype.parseBasicLitNode = function() {
   }
 };
 
+goparser.Parser.prototype.parseOperandNameNode = function() {
+  var identifierToken = this.accept("identifier");
+  if (!identifierToken) return null;
+  
+  if (!this.accept(".")) {
+    return {
+      type: "Identifier", 
+      loc: identifierToken.loc, 
+      name: identifierToken.value};
+  }
+  var identifierToken2 = this.accept("identifier");
+  return {
+    type: "QualifiedIdentifier",
+    loc: this.mergeLoc(identifierToken.loc, identifierToken2.loc),
+    package: identifierToken.value,
+    name: identifierToken2.value
+  };
+};
+
+
 goparser.Parser.prototype.next = function() {
   this._curToken = this.tokenizer.readToken();
 };
+
+goparser.Parser.prototype.accept = function(type) {
+  if (this._curToken.type == type) {
+    var acceptedToken = this._curToken;
+    this._curToken = this.tokenizer.readToken();
+    return acceptedToken;
+  }
+  return null;
+};
+
+goparser.Parser.prototype.mergeLoc = function(loc1, loc2) {
+  return {start: loc1.start, end: loc2.end};
+};
+
+
 
 
 });
